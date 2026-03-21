@@ -49,6 +49,31 @@ export type NormalizedTransactionStatus = {
   raw: Record<string, unknown>;
 };
 
+export type VerifyPaymentIntentInput = {
+  checkoutRequestId: string;
+  expectedAmount: number;
+  expectedPhoneNumber?: string;
+};
+
+export type PaymentIntentEvaluationInput = {
+  expectedAmount: number;
+  expectedPhoneNumber?: string;
+};
+
+export type PaymentIntentVerification = {
+  state: "pending" | "verified" | "unverified" | "failed";
+  verified: boolean;
+  amountMatch: "match" | "mismatch" | "unknown";
+  phoneMatch: "match" | "mismatch" | "unknown";
+  expectedAmount: number;
+  actualAmount: number | null;
+  expectedPhoneNumber: string | null;
+  actualPhoneNumber: string | null;
+  reason: string;
+  nextAction: string;
+  status: NormalizedTransactionStatus;
+};
+
 function twoDigits(value: number): string {
   return value.toString().padStart(2, "0");
 }
@@ -144,6 +169,65 @@ function toOptionalNumber(value: unknown): number | null {
     if (Number.isFinite(parsed)) {
       return parsed;
     }
+  }
+
+  return null;
+}
+
+function toRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
+}
+
+function extractMetadataItems(raw: Record<string, unknown>): Array<Record<string, unknown>> {
+  const directMeta = toRecord(raw.CallbackMetadata);
+  const directItems = Array.isArray(directMeta?.Item) ? directMeta.Item : null;
+  if (directItems) {
+    return directItems.filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null);
+  }
+
+  const body = toRecord(raw.Body);
+  const stkCallback = toRecord(body?.stkCallback);
+  const callbackMeta = toRecord(stkCallback?.CallbackMetadata);
+  const nestedItems = Array.isArray(callbackMeta?.Item) ? callbackMeta.Item : null;
+  if (nestedItems) {
+    return nestedItems.filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null);
+  }
+
+  return [];
+}
+
+function findMetadataValue(raw: Record<string, unknown>, name: string): unknown {
+  const items = extractMetadataItems(raw);
+  for (const item of items) {
+    if (item.Name === name) {
+      return item.Value;
+    }
+  }
+
+  return undefined;
+}
+
+function extractActualAmount(raw: Record<string, unknown>): number | null {
+  const fromMetadata = toOptionalNumber(findMetadataValue(raw, "Amount"));
+  if (fromMetadata !== null) {
+    return fromMetadata;
+  }
+
+  return toOptionalNumber(raw.Amount);
+}
+
+function extractActualPhoneNumber(raw: Record<string, unknown>): string | null {
+  const fromMetadata = findMetadataValue(raw, "PhoneNumber");
+  if (fromMetadata !== undefined && fromMetadata !== null) {
+    return String(fromMetadata);
+  }
+
+  if (typeof raw.PhoneNumber === "string" || typeof raw.PhoneNumber === "number") {
+    return String(raw.PhoneNumber);
   }
 
   return null;
@@ -469,4 +553,105 @@ export async function checkTransactionStatus(
   }
 
   return normalized;
+}
+
+export function evaluatePaymentIntent(
+  status: NormalizedTransactionStatus,
+  input: PaymentIntentEvaluationInput
+): PaymentIntentVerification {
+  const expectedAmount = normalizeAmount(input.expectedAmount);
+  const expectedPhoneNumber = input.expectedPhoneNumber ? normalizePhoneNumber(input.expectedPhoneNumber) : null;
+
+  if (status.status === "pending" || !status.isComplete) {
+    return {
+      state: "pending",
+      verified: false,
+      amountMatch: "unknown",
+      phoneMatch: expectedPhoneNumber ? "unknown" : "unknown",
+      expectedAmount,
+      actualAmount: null,
+      expectedPhoneNumber,
+      actualPhoneNumber: null,
+      reason: "Payment is still processing.",
+      nextAction: "Retry verification after callback or status completion.",
+      status
+    };
+  }
+
+  if (status.status === "failed") {
+    return {
+      state: "failed",
+      verified: false,
+      amountMatch: "unknown",
+      phoneMatch: expectedPhoneNumber ? "unknown" : "unknown",
+      expectedAmount,
+      actualAmount: null,
+      expectedPhoneNumber,
+      actualPhoneNumber: null,
+      reason: status.message,
+      nextAction: "Treat payment as failed and request a new payment attempt.",
+      status
+    };
+  }
+
+  const actualAmount = extractActualAmount(status.raw);
+  const amountMatch = actualAmount === null
+    ? "unknown"
+    : Math.abs(actualAmount - expectedAmount) < 0.000001
+      ? "match"
+      : "mismatch";
+
+  const actualPhoneRaw = extractActualPhoneNumber(status.raw);
+  const actualPhoneNumber = actualPhoneRaw ? normalizePhoneNumber(actualPhoneRaw) : null;
+  const phoneMatch = expectedPhoneNumber === null
+    ? "unknown"
+    : actualPhoneNumber === null
+      ? "unknown"
+      : actualPhoneNumber === expectedPhoneNumber
+        ? "match"
+        : "mismatch";
+
+  if (amountMatch === "match" && (phoneMatch === "match" || phoneMatch === "unknown")) {
+    return {
+      state: "verified",
+      verified: true,
+      amountMatch,
+      phoneMatch,
+      expectedAmount,
+      actualAmount,
+      expectedPhoneNumber,
+      actualPhoneNumber,
+      reason: "Payment intent verified successfully.",
+      nextAction: "Mark order as paid and continue fulfillment.",
+      status
+    };
+  }
+
+  return {
+    state: "unverified",
+    verified: false,
+    amountMatch,
+    phoneMatch,
+    expectedAmount,
+    actualAmount,
+    expectedPhoneNumber,
+    actualPhoneNumber,
+    reason: "Payment completed but verification checks did not fully match expected intent.",
+    nextAction: "Flag for manual review or request customer confirmation.",
+    status
+  };
+}
+
+export async function verifyPaymentIntent(
+  env: DarajaEnv,
+  input: VerifyPaymentIntentInput
+): Promise<PaymentIntentVerification> {
+  const status = await checkTransactionStatus(env, {
+    checkoutRequestId: input.checkoutRequestId
+  });
+
+  return evaluatePaymentIntent(status, {
+    expectedAmount: input.expectedAmount,
+    expectedPhoneNumber: input.expectedPhoneNumber
+  });
 }

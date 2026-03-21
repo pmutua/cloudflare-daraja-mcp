@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
-import { checkTransactionStatus, getDarajaAccessToken, stkPush } from "./daraja";
+import { checkTransactionStatus, getDarajaAccessToken, stkPush, verifyPaymentIntent } from "./daraja";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -174,5 +174,25 @@ registerTool(
   },
   {
     checkoutRequestId: z.string().min(1).describe("CheckoutRequestID returned from stk_push.")
+  }
+);
+
+registerTool(
+  "verify_payment_intent",
+  "Verifies payment intent using transaction status, amount matching, and optional phone matching.",
+  async ({ env }, args) => {
+    return verifyPaymentIntent(env, {
+      checkoutRequestId: String(args.checkoutRequestId ?? ""),
+      expectedAmount: Number(args.expectedAmount),
+      expectedPhoneNumber: typeof args.expectedPhoneNumber === "string" ? args.expectedPhoneNumber : undefined
+    });
+  },
+  {
+    checkoutRequestId: z.string().min(1).describe("CheckoutRequestID from stk_push response."),
+    expectedAmount: z.number().positive().describe("Expected payment amount for this intent."),
+    expectedPhoneNumber: z
+      .string()
+      .optional()
+      .describe("Optional expected customer phone for additional verification.")
   }
 );

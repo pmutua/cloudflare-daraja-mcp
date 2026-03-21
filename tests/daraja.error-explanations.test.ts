@@ -26,4 +26,18 @@ describe("explainDarajaErrorCode", () => {
     expect(result.code).toBe(7777);
     expect(result.nextAction.toLowerCase()).toContain("retry");
   });
+
+  it("maps additional documented result code", () => {
+    const result = explainDarajaErrorCode(2028);
+
+    expect(result.found).toBe(true);
+    expect(result.category).toBe("not_permitted");
+  });
+
+  it("maps non-numeric documented code", () => {
+    const result = explainDarajaErrorCode("SFC_IC0003");
+
+    expect(result.found).toBe(true);
+    expect(String(result.code)).toBe("SFC_IC0003");
+  });
 });

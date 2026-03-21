@@ -4,8 +4,14 @@ const TOKEN_CACHE_KEY = "daraja:oauth:access_token";
 const TOKEN_REFRESH_BUFFER_SECONDS = 60;
 
 const DEFAULT_TRANSACTION_TYPE = "CustomerPayBillOnline";
+const DEFAULT_TRANSACTION_DESC = "Payment";
 
 const DARAJA_ERROR_MAP: Record<number, { category: string; explanation: string; nextAction: string }> = {
+  0: {
+    category: "success",
+    explanation: "The service request is processed successfully.",
+    nextAction: "Proceed with fulfillment and reconciliation."
+  },
   1: {
     category: "insufficient_funds",
     explanation: "Customer has insufficient M-Pesa balance to complete the payment.",
@@ -41,10 +47,93 @@ const DARAJA_ERROR_MAP: Record<number, { category: string; explanation: string; 
     explanation: "Invalid initiator information or PIN/authentication issue.",
     nextAction: "Confirm credentials and ask customer to enter correct PIN."
   },
+  2: {
+    category: "limit_rule",
+    explanation: "Declined due to limit rule. Amount may be below allowed minimum.",
+    nextAction: "Ensure amount is within allowed limits and retry."
+  },
+  3: {
+    category: "limit_rule",
+    explanation: "Declined due to limit rule: amount is greater than maximum allowed.",
+    nextAction: "Reduce amount and retry transaction."
+  },
+  4: {
+    category: "limit_rule",
+    explanation: "Declined due to daily transfer limit.",
+    nextAction: "Ask customer to retry later or use another payment method."
+  },
+  8: {
+    category: "limit_rule",
+    explanation: "Declined because transaction would exceed account balance limit.",
+    nextAction: "Confirm account limits and retry with valid amount."
+  },
+  17: {
+    category: "frequency_rule",
+    explanation: "Repeated transactions in quick succession were blocked by rule limits.",
+    nextAction: "Wait at least 2 minutes before retrying similar transaction."
+  },
+  2028: {
+    category: "not_permitted",
+    explanation: "Request is not permitted according to product assignment.",
+    nextAction: "Verify TransactionType, BusinessShortCode, and PartyB configuration."
+  },
+  8006: {
+    category: "credential_locked",
+    explanation: "Security credential is locked.",
+    nextAction: "Advise customer to contact support for credential unlock."
+  },
   9999: {
     category: "general_error",
     explanation: "General STK push system error.",
     nextAction: "Retry and monitor if issue persists."
+  }
+};
+
+const DARAJA_STRING_ERROR_MAP: Record<string, { category: string; explanation: string; nextAction: string }> = {
+  "400.002.02": {
+    category: "bad_request",
+    explanation: "Bad Request - Invalid field value in request payload.",
+    nextAction: "Validate payload fields against Daraja API requirements."
+  },
+  "404.001.03": {
+    category: "invalid_access_token",
+    explanation: "Invalid access token.",
+    nextAction: "Regenerate OAuth token and retry before token expiry."
+  },
+  "404.001.01": {
+    category: "resource_not_found",
+    explanation: "Requested API resource not found.",
+    nextAction: "Confirm endpoint path and environment base URL."
+  },
+  "405.001": {
+    category: "method_not_allowed",
+    explanation: "Method Not Allowed.",
+    nextAction: "Use the documented HTTP method for the endpoint."
+  },
+  "500.001.1001": {
+    category: "credential_or_merchant_error",
+    explanation: "Merchant credentials mismatch or merchant does not exist.",
+    nextAction: "Verify short code, passkey, timestamp, and encoded password consistency."
+  },
+  "500.003.02": {
+    category: "system_busy",
+    explanation: "System busy or rate controls triggered.",
+    nextAction: "Apply backoff and retry while respecting API rate limits."
+  },
+  "500.003.03": {
+    category: "quota_violation",
+    explanation: "Quota violation due to excessive requests.",
+    nextAction: "Throttle requests and retry within API quotas."
+  },
+  "500.003.1001": {
+    category: "internal_server_error",
+    explanation: "Internal server error from upstream.",
+    nextAction: "Retry with backoff and verify request setup."
+  },
+  SFC_IC0003: {
+    category: "operator_not_found",
+    explanation: "Operator does not exist, often due to incorrect product assignment parameters.",
+    nextAction: "Verify PartyB and TransactionType values for PayBill or BuyGoods configuration."
   }
 };
 
@@ -72,9 +161,10 @@ export type StkPushInput = {
   amount: number;
   phoneNumber: string;
   accountReference: string;
-  transactionDesc: string;
+  transactionDesc?: string;
   callbackUrl?: string;
   transactionType?: string;
+  partyB?: string;
 };
 
 export type TransactionStatusInput = {
@@ -127,11 +217,20 @@ export type SimulatePaymentInput = {
 
 export type DarajaErrorExplanation = {
   found: boolean;
-  code: number;
+  code: number | string;
   category: string;
   explanation: string;
   nextAction: string;
 };
+
+function resolvePartyB(shortCode: string, value: string | undefined): string {
+  const normalized = (value ?? shortCode).trim();
+  if (!/^\d{5,6}$/.test(normalized)) {
+    throw new Error("partyB must be a 5-6 digit numeric value.");
+  }
+
+  return normalized;
+}
 
 function twoDigits(value: number): string {
   return value.toString().padStart(2, "0");
@@ -422,7 +521,8 @@ export async function stkPush(env: DarajaEnv, input: StkPushInput): Promise<Reco
   const amount = normalizeAmount(input.amount);
   const phoneNumber = normalizePhoneNumber(input.phoneNumber);
   const accountReference = input.accountReference.trim();
-  const transactionDesc = input.transactionDesc.trim();
+  const transactionDesc = (input.transactionDesc ?? DEFAULT_TRANSACTION_DESC).trim();
+  const partyB = resolvePartyB(shortCode, input.partyB);
 
   if (!accountReference) {
     throw new Error("accountReference is required.");
@@ -451,7 +551,7 @@ export async function stkPush(env: DarajaEnv, input: StkPushInput): Promise<Reco
     TransactionType: (input.transactionType ?? env.DARAJA_TRANSACTION_TYPE ?? DEFAULT_TRANSACTION_TYPE).trim(),
     Amount: amount,
     PartyA: phoneNumber,
-    PartyB: shortCode,
+    PartyB: partyB,
     PhoneNumber: phoneNumber,
     CallBackURL: callbackUrl,
     AccountReference: accountReference,
@@ -790,12 +890,27 @@ export async function simulatePayment(input: SimulatePaymentInput): Promise<Reco
 }
 
 export function explainDarajaErrorCode(code: number | string): DarajaErrorExplanation {
-  const parsedCode = typeof code === "number" ? code : Number(code);
+  const normalizedInput = typeof code === "string" ? code.trim() : code;
+
+  if (typeof normalizedInput === "string" && normalizedInput.length > 0) {
+    const knownString = DARAJA_STRING_ERROR_MAP[normalizedInput.toUpperCase()] ?? DARAJA_STRING_ERROR_MAP[normalizedInput];
+    if (knownString) {
+      return {
+        found: true,
+        code: normalizedInput,
+        category: knownString.category,
+        explanation: knownString.explanation,
+        nextAction: knownString.nextAction
+      };
+    }
+  }
+
+  const parsedCode = typeof normalizedInput === "number" ? normalizedInput : Number(normalizedInput);
 
   if (!Number.isFinite(parsedCode)) {
     return {
       found: false,
-      code: -1,
+      code: typeof normalizedInput === "string" ? normalizedInput : -1,
       category: "invalid_code",
       explanation: "Provided error code is not a valid number.",
       nextAction: "Provide a numeric Daraja result code to get guidance."

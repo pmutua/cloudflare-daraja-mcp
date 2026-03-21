@@ -7,11 +7,17 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Hardened payment intent verification to gracefully handle malformed callback phone values without throwing.
+- Added optional `partyB` override for STK push to better support BuyGoods and advanced recipient configuration.
+- Made `transactionDesc` optional for STK push with safe default (`Payment`).
+- Extended Daraja error explanation coverage for additional documented numeric and string error codes.
+- Enhanced `doctor --strict` to fail when required values are still placeholders.
 
 ### Tests
 
 - Added `tests/daraja.edge-cases.test.ts` for malformed callback phone metadata and minimal status payload edge cases.
 - Added automated coverage workflow using Vitest V8 provider and README coverage summary sync.
+- Added `tests/daraja.stk-push.config.test.ts` for partyB override and optional transaction description behavior.
+- Added `tests/doctor.placeholders.test.ts` for strict placeholder detection in developer environment checks.
 
 ### Documentation
 

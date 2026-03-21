@@ -158,21 +158,31 @@ registerTool(
       amount: Number(args.amount),
       phoneNumber: String(args.phoneNumber ?? ""),
       accountReference: String(args.accountReference ?? ""),
-      transactionDesc: String(args.transactionDesc ?? ""),
+      transactionDesc: typeof args.transactionDesc === "string" ? args.transactionDesc : undefined,
       callbackUrl: typeof args.callbackUrl === "string" ? args.callbackUrl : undefined,
-      transactionType: typeof args.transactionType === "string" ? args.transactionType : undefined
+      transactionType: typeof args.transactionType === "string" ? args.transactionType : undefined,
+      partyB: typeof args.partyB === "string" ? args.partyB : undefined
     });
   },
   {
     amount: z.number().positive().describe("Amount to charge, positive whole number."),
     phoneNumber: z.string().describe("Customer phone number in 2547XXXXXXXX or 07XXXXXXXX format."),
     accountReference: z.string().min(1).max(12).describe("Reference shown to customer, max 12 chars."),
-    transactionDesc: z.string().min(1).max(13).describe("Short transaction description, max 13 chars."),
+    transactionDesc: z
+      .string()
+      .max(13)
+      .optional()
+      .describe("Optional short transaction description, max 13 chars. Defaults to 'Payment'."),
     callbackUrl: z.string().url().optional().describe("Optional callback URL override."),
     transactionType: z
       .enum(["CustomerPayBillOnline", "CustomerBuyGoodsOnline"])
       .optional()
-      .describe("Daraja STK transaction type.")
+      .describe("Daraja STK transaction type."),
+    partyB: z
+      .string()
+      .regex(/^\d{5,6}$/)
+      .optional()
+      .describe("Optional recipient identifier for BuyGoods/PayBill flows. Defaults to shortcode.")
   }
 );
 

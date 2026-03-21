@@ -83,4 +83,5 @@ Not ideal when:
 
 - Runtime and operations checklist: [docs/RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md)
 - Version and release process: [docs/VERSIONING.md](VERSIONING.md)
+- Architecture diagrams and examples: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Change history: [CHANGELOG.md](../CHANGELOG.md)

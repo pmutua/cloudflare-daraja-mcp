@@ -7,6 +7,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 If you are new to MCP, read this first:
 
 - [docs/BEGINNER_GUIDE.md](docs/BEGINNER_GUIDE.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 In simple terms, this project lets an AI assistant safely do common M-Pesa payment tasks through structured tools.
 
@@ -48,6 +49,37 @@ This server gives you:
 3. The selected tool runs Daraja API logic.
 4. Results are returned as structured JSON for the AI client.
 5. Callback updates and transaction metadata are stored in KV.
+
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+  A[AI Client] -->|MCP call| B[Daraja MCP Server]
+  B --> C[Auth and Rate Limit]
+  B --> D[Tool Handlers]
+  D --> E[Daraja API]
+  D --> F[Cloudflare KV]
+  E --> G[/callback]
+  G --> F
+```
+
+For full architecture, sequence diagrams, and examples, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Usage Examples
+
+List tools:
+
+```bash
+curl -H "x-api-key: <your_api_key>" https://<your-domain>/mcp/tools
+```
+
+Health check:
+
+```bash
+curl https://<your-domain>/health
+```
+
+See end-to-end illustrations and tool input/output examples in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Quick Start in 5 Minutes
 

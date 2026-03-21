@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
-import { checkTransactionStatus, getDarajaAccessToken, stkPush, verifyPaymentIntent } from "./daraja";
+import { checkTransactionStatus, getDarajaAccessToken, simulatePayment, stkPush, verifyPaymentIntent } from "./daraja";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -194,5 +194,28 @@ registerTool(
       .string()
       .optional()
       .describe("Optional expected customer phone for additional verification.")
+  }
+);
+
+registerTool(
+  "simulate_payment",
+  "Simulates a payment flow for development without calling Daraja APIs.",
+  async (_, args) => {
+    return simulatePayment({
+      amount: Number(args.amount),
+      phoneNumber: String(args.phoneNumber ?? ""),
+      accountReference: String(args.accountReference ?? ""),
+      transactionDesc: String(args.transactionDesc ?? ""),
+      outcome: args.outcome === "success" || args.outcome === "failed" || args.outcome === "pending"
+        ? args.outcome
+        : undefined
+    });
+  },
+  {
+    amount: z.number().positive().describe("Amount to simulate."),
+    phoneNumber: z.string().describe("Customer phone number in 2547XXXXXXXX or 07XXXXXXXX format."),
+    accountReference: z.string().min(1).max(12).describe("Reference shown to customer, max 12 chars."),
+    transactionDesc: z.string().min(1).max(13).describe("Transaction description, max 13 chars."),
+    outcome: z.enum(["pending", "success", "failed"]).optional().describe("Optional forced simulation outcome.")
   }
 );

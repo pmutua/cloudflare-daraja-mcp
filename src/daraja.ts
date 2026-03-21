@@ -74,6 +74,14 @@ export type PaymentIntentVerification = {
   status: NormalizedTransactionStatus;
 };
 
+export type SimulatePaymentInput = {
+  amount: number;
+  phoneNumber: string;
+  accountReference: string;
+  transactionDesc: string;
+  outcome?: "pending" | "success" | "failed";
+};
+
 function twoDigits(value: number): string {
   return value.toString().padStart(2, "0");
 }
@@ -654,4 +662,70 @@ export async function verifyPaymentIntent(
     expectedAmount: input.expectedAmount,
     expectedPhoneNumber: input.expectedPhoneNumber
   });
+}
+
+export async function simulatePayment(input: SimulatePaymentInput): Promise<Record<string, unknown>> {
+  const amount = normalizeAmount(input.amount);
+  const phoneNumber = normalizePhoneNumber(input.phoneNumber);
+  const accountReference = input.accountReference.trim();
+  const transactionDesc = input.transactionDesc.trim();
+
+  if (!accountReference) {
+    throw new Error("accountReference is required.");
+  }
+
+  if (!transactionDesc) {
+    throw new Error("transactionDesc is required.");
+  }
+
+  const now = new Date();
+  const checkoutRequestId = `sim_${now.getTime()}_${crypto.randomUUID().slice(0, 8)}`;
+  const merchantRequestId = `sim_mr_${crypto.randomUUID().slice(0, 8)}`;
+  const outcome = input.outcome ?? "pending";
+
+  if (outcome === "success") {
+    return {
+      simulated: true,
+      status: "success",
+      resultCode: 0,
+      message: "Simulated payment marked as successful.",
+      checkoutRequestId,
+      merchantRequestId,
+      amount,
+      phoneNumber,
+      accountReference,
+      transactionDesc,
+      verifiedHint: "Use verify_payment_intent with expectedAmount to validate the simulated result."
+    };
+  }
+
+  if (outcome === "failed") {
+    return {
+      simulated: true,
+      status: "failed",
+      resultCode: 1032,
+      message: "Simulated payment marked as failed (user canceled).",
+      checkoutRequestId,
+      merchantRequestId,
+      amount,
+      phoneNumber,
+      accountReference,
+      transactionDesc,
+      verifiedHint: "Use check_transaction_status to inspect failed simulation details."
+    };
+  }
+
+  return {
+    simulated: true,
+    status: "pending",
+    resultCode: null,
+    message: "Simulated payment accepted for processing.",
+    checkoutRequestId,
+    merchantRequestId,
+    amount,
+    phoneNumber,
+    accountReference,
+    transactionDesc,
+    verifiedHint: "Use verify_payment_intent once simulation outcome is available."
+  };
 }

@@ -1,7 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
-import { checkTransactionStatus, getDarajaAccessToken, simulatePayment, stkPush, verifyPaymentIntent } from "./daraja";
+import {
+  checkTransactionStatus,
+  explainDarajaErrorCode,
+  getDarajaAccessToken,
+  simulatePayment,
+  stkPush,
+  verifyPaymentIntent
+} from "./daraja";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -217,5 +224,16 @@ registerTool(
     accountReference: z.string().min(1).max(12).describe("Reference shown to customer, max 12 chars."),
     transactionDesc: z.string().min(1).max(13).describe("Transaction description, max 13 chars."),
     outcome: z.enum(["pending", "success", "failed"]).optional().describe("Optional forced simulation outcome.")
+  }
+);
+
+registerTool(
+  "explain_error_code",
+  "Explains known Daraja error codes and recommended next actions.",
+  async (_, args) => {
+    return explainDarajaErrorCode(typeof args.code === "string" || typeof args.code === "number" ? args.code : "");
+  },
+  {
+    code: z.union([z.number(), z.string()]).describe("Daraja result/error code to explain.")
   }
 );

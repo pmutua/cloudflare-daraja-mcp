@@ -5,6 +5,49 @@ const TOKEN_REFRESH_BUFFER_SECONDS = 60;
 
 const DEFAULT_TRANSACTION_TYPE = "CustomerPayBillOnline";
 
+const DARAJA_ERROR_MAP: Record<number, { category: string; explanation: string; nextAction: string }> = {
+  1: {
+    category: "insufficient_funds",
+    explanation: "Customer has insufficient M-Pesa balance to complete the payment.",
+    nextAction: "Ask the customer to top up balance or try another payment method."
+  },
+  1001: {
+    category: "session_conflict",
+    explanation: "Subscriber lock error due to another active USSD or SIM toolkit session.",
+    nextAction: "Ask customer to close other M-Pesa sessions and retry after 2-3 minutes."
+  },
+  1019: {
+    category: "expired",
+    explanation: "Transaction expired before customer completed authorization.",
+    nextAction: "Retry the payment request and ask customer to complete promptly."
+  },
+  1025: {
+    category: "request_issue",
+    explanation: "System issue while processing STK push request.",
+    nextAction: "Retry and verify request payload constraints."
+  },
+  1032: {
+    category: "user_action",
+    explanation: "Customer canceled the STK prompt or did not complete it.",
+    nextAction: "Notify customer and retry when they are ready."
+  },
+  1037: {
+    category: "timeout_unreachable",
+    explanation: "Device unreachable or SIM not ready; push timed out.",
+    nextAction: "Ask customer to ensure network availability and SIM readiness, then retry."
+  },
+  2001: {
+    category: "invalid_credentials",
+    explanation: "Invalid initiator information or PIN/authentication issue.",
+    nextAction: "Confirm credentials and ask customer to enter correct PIN."
+  },
+  9999: {
+    category: "general_error",
+    explanation: "General STK push system error.",
+    nextAction: "Retry and monitor if issue persists."
+  }
+};
+
 type CachedToken = {
   accessToken: string;
   expiresAt: number;
@@ -80,6 +123,14 @@ export type SimulatePaymentInput = {
   accountReference: string;
   transactionDesc: string;
   outcome?: "pending" | "success" | "failed";
+};
+
+export type DarajaErrorExplanation = {
+  found: boolean;
+  code: number;
+  category: string;
+  explanation: string;
+  nextAction: string;
 };
 
 function twoDigits(value: number): string {
@@ -727,5 +778,40 @@ export async function simulatePayment(input: SimulatePaymentInput): Promise<Reco
     accountReference,
     transactionDesc,
     verifiedHint: "Use verify_payment_intent once simulation outcome is available."
+  };
+}
+
+export function explainDarajaErrorCode(code: number | string): DarajaErrorExplanation {
+  const parsedCode = typeof code === "number" ? code : Number(code);
+
+  if (!Number.isFinite(parsedCode)) {
+    return {
+      found: false,
+      code: -1,
+      category: "invalid_code",
+      explanation: "Provided error code is not a valid number.",
+      nextAction: "Provide a numeric Daraja result code to get guidance."
+    };
+  }
+
+  const normalizedCode = Math.trunc(parsedCode);
+  const known = DARAJA_ERROR_MAP[normalizedCode];
+
+  if (!known) {
+    return {
+      found: false,
+      code: normalizedCode,
+      category: "unknown",
+      explanation: "No specific explanation is mapped for this Daraja error code.",
+      nextAction: "Retry if appropriate and inspect callback/status payload details for context."
+    };
+  }
+
+  return {
+    found: true,
+    code: normalizedCode,
+    category: known.category,
+    explanation: known.explanation,
+    nextAction: known.nextAction
   };
 }

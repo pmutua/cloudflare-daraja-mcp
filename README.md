@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**, **Commit 10 - Simulation Tool**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**, **Commit 10 - Simulation Tool**, **Commit 11 - Error Intelligence**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -29,6 +29,7 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - Callback endpoint: `POST /callback`
 - Callback payload storage in KV (`CALLBACKS` namespace)
 - Development simulation tool: `simulate_payment` (no external API calls)
+- Daraja error explanation tool: `explain_error_code`
 
 ## Authentication
 

@@ -26,6 +26,7 @@ Run all local checks before release:
 
 ```bash
 npm install
+npm run doctor
 npm run check
 npm test
 npm run test:e2e
@@ -34,6 +35,7 @@ npm run test:e2e
 If Terraform changes are included:
 
 ```bash
+export TF_VAR_cloudflare_api_token="<cloudflare_api_token>"
 cd infra/terraform
 terraform fmt -check
 terraform init

@@ -1,4 +1,5 @@
-cloudflare_api_token = "<cloudflare_api_token>"
+# Set token via environment variable instead of tfvars:
+#   TF_VAR_cloudflare_api_token
 account_id           = "<cloudflare_account_id>"
 
 # Optional custom route

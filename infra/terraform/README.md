@@ -24,9 +24,15 @@ This Terraform module provisions core Cloudflare resources for `daraja-mcp-serve
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-2. Fill in real values in `terraform.tfvars`.
+2. Export Cloudflare API token from your shell (recommended):
 
-3. Initialize and apply:
+```bash
+export TF_VAR_cloudflare_api_token="<cloudflare_api_token>"
+```
+
+3. Fill in non-sensitive values in `terraform.tfvars`.
+
+4. Initialize and apply:
 
 ```bash
 terraform init
@@ -34,7 +40,7 @@ terraform plan
 terraform apply
 ```
 
-4. Copy `wrangler_kv_snippet` output into your `wrangler.toml`.
+5. Copy `wrangler_kv_snippet` output into your `wrangler.toml`.
 
 ## Notes
 

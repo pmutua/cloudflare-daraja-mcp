@@ -1,0 +1,15 @@
+# Copy this file to .dev.vars for local wrangler development
+# cp .dev.vars.example .dev.vars
+
+API_KEY=replace_with_local_api_key
+DARAJA_CONSUMER_KEY=replace_with_consumer_key
+DARAJA_CONSUMER_SECRET=replace_with_consumer_secret
+DARAJA_SHORTCODE=replace_with_shortcode
+DARAJA_PASSKEY=replace_with_passkey
+DARAJA_CALLBACK_URL=https://example.com/callback
+
+# Optional
+DARAJA_ENV=sandbox
+# DARAJA_BASE_URL=https://sandbox.safaricom.co.ke
+# DARAJA_TRANSACTION_TYPE=CustomerPayBillOnline
+# DEBUG_MODE=true

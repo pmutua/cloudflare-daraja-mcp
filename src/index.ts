@@ -33,6 +33,19 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+function constantTimeStringEquals(left: string, right: string): boolean {
+  const maxLength = Math.max(left.length, right.length);
+  let mismatch = left.length === right.length ? 0 : 1;
+
+  for (let i = 0; i < maxLength; i += 1) {
+    const leftCode = i < left.length ? left.charCodeAt(i) : 0;
+    const rightCode = i < right.length ? right.charCodeAt(i) : 0;
+    mismatch |= leftCode ^ rightCode;
+  }
+
+  return mismatch === 0;
+}
+
 function isAuthorized(request: Request, env: Env): boolean {
   const configuredApiKey = env.API_KEY;
   if (!configuredApiKey) {
@@ -40,7 +53,11 @@ function isAuthorized(request: Request, env: Env): boolean {
   }
 
   const providedApiKey = request.headers.get("x-api-key");
-  return providedApiKey === configuredApiKey;
+  if (!providedApiKey) {
+    return false;
+  }
+
+  return constantTimeStringEquals(providedApiKey, configuredApiKey);
 }
 
 function unauthorized(): Response {

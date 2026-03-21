@@ -148,6 +148,15 @@ npm test
 npm run deploy
 ```
 
+## Release Runbook
+
+Use the production checklist in [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md) for:
+
+- pre-release validation (`npm run check`, tests, Terraform validate)
+- Cloudflare secrets and bindings verification
+- deployment sequence (`terraform apply` and `npm run deploy`)
+- post-deploy smoke tests for `/health`, `/mcp/tools`, and callback routing
+
 ## Health Check Response
 
 `GET /health`

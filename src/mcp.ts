@@ -9,6 +9,7 @@ import {
   stkPush,
   verifyPaymentIntent
 } from "./daraja";
+import { summarizeTransactionLogs } from "./insights";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -18,6 +19,9 @@ export const MCP_SERVER_INFO = {
 type ToolRuntimeEnv = {
   TOKENS: KVNamespace;
   TRANSACTIONS: KVNamespace;
+  AI?: {
+    run: (model: string, input: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  };
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;
@@ -235,5 +239,17 @@ registerTool(
   },
   {
     code: z.union([z.number(), z.string()]).describe("Daraja result/error code to explain.")
+  }
+);
+
+registerTool(
+  "summarize_transaction_logs",
+  "Summarizes recent transaction logs and optionally enhances the summary using Workers AI.",
+  async ({ env }, args) => {
+    const limit = typeof args.limit === "number" ? args.limit : 20;
+    return summarizeTransactionLogs(env.TRANSACTIONS, env.AI, limit);
+  },
+  {
+    limit: z.number().int().positive().max(100).optional().describe("Max number of recent transaction logs to summarize.")
   }
 );

@@ -8,6 +8,9 @@ export interface Env {
   TOKENS: KVNamespace;
   TRANSACTIONS: KVNamespace;
   CALLBACKS: KVNamespace;
+  AI?: {
+    run: (model: string, input: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  };
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;

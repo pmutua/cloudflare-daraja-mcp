@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -17,6 +17,8 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - API key auth middleware for protected routes via `x-api-key`
 - KV-backed daily rate limiting middleware (`USAGE` namespace)
 - Request limit: `50` requests per UTC day
+- Daraja OAuth token tool: `get_access_token`
+- Token caching in KV (`TOKENS` namespace)
 
 ## Authentication
 
@@ -41,6 +43,29 @@ preview_id = "<your-usage-kv-preview-id>"
 ```
 
 If the daily quota is exhausted, protected endpoints return `429`.
+
+## Daraja OAuth
+
+Required secrets:
+
+```bash
+wrangler secret put DARAJA_CONSUMER_KEY
+wrangler secret put DARAJA_CONSUMER_SECRET
+```
+
+Optional secrets/vars:
+
+- `DARAJA_ENV` = `sandbox` (default) or `production`
+- `DARAJA_BASE_URL` = custom override for Daraja base URL
+
+Add token cache KV binding in `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "<your-tokens-kv-namespace-id>"
+preview_id = "<your-tokens-kv-preview-id>"
+```
 
 ## Run Locally
 

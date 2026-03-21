@@ -4,6 +4,11 @@ import { checkAndIncrementDailyUsage } from "./rateLimit";
 export interface Env {
   API_KEY: string;
   USAGE: KVNamespace;
+  TOKENS: KVNamespace;
+  DARAJA_CONSUMER_KEY?: string;
+  DARAJA_CONSUMER_SECRET?: string;
+  DARAJA_ENV?: string;
+  DARAJA_BASE_URL?: string;
 }
 
 function json(data: unknown, status = 200): Response {
@@ -67,7 +72,7 @@ export default {
     }
 
     if (url.pathname === "/mcp") {
-      return handleMcpRequest(request);
+      return handleMcpRequest(request, env);
     }
 
     if (request.method === "GET" && url.pathname === "/mcp/tools") {

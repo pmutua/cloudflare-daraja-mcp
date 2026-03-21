@@ -8,3 +8,8 @@ workers_dev = true
 # binding = "USAGE"
 # id = "<your-usage-kv-namespace-id>"
 # preview_id = "<your-usage-kv-preview-id>"
+
+# [[kv_namespaces]]
+# binding = "TOKENS"
+# id = "<your-tokens-kv-namespace-id>"
+# preview_id = "<your-tokens-kv-preview-id>"

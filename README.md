@@ -2,6 +2,64 @@
 
 Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Daraja) APIs as AI-callable tools.
 
+## Start Here (Beginner Friendly)
+
+If you are new to MCP, read this first:
+
+- [docs/BEGINNER_GUIDE.md](docs/BEGINNER_GUIDE.md)
+
+In simple terms, this project lets an AI assistant safely do common M-Pesa payment tasks through structured tools.
+
+## What Is an MCP Server?
+
+MCP (Model Context Protocol) is a standard way for AI assistants to call tools.
+
+An MCP server is a service that:
+
+1. defines tools with clear input/output rules
+2. receives tool calls from AI clients
+3. executes real business actions
+4. returns structured responses
+
+In this project, the tools are payment-focused actions like starting STK push and checking transaction status.
+
+## Why This Server Is Useful
+
+Without this server, teams often hardcode payment logic inside chatbot prompts or app glue code.
+
+This server gives you:
+
+1. reusable payment tools any MCP-compatible client can call
+2. safer operations via API key auth and rate limits
+3. reliable transaction traceability in KV logs
+4. cleaner separation between AI behavior and payment infrastructure
+
+## Typical Use Cases
+
+1. AI customer support can trigger STK push after user confirmation.
+2. AI checkout assistant can verify if a payment completed.
+3. Operations assistant can explain Daraja error codes quickly.
+4. Developers can simulate payment flows in sandbox without real charge.
+
+## How It Works (High Level)
+
+1. Your AI client sends a tool call to this server at `/mcp`.
+2. The server validates auth and usage limits.
+3. The selected tool runs Daraja API logic.
+4. Results are returned as structured JSON for the AI client.
+5. Callback updates and transaction metadata are stored in KV.
+
+## Quick Start in 5 Minutes
+
+1. Install dependencies: `npm install`
+2. Create local vars template: `npm run setup:local`
+3. Fill real values in `.dev.vars`
+4. Validate config: `npm run doctor`
+5. Start local server: `npm run dev`
+6. Check health: `GET /health`
+
+If you want a strict config check that fails on missing required values, run: `npm run doctor -- --strict`
+
 ## Current Status
 
 Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**, **Commit 10 - Simulation Tool**, **Commit 11 - Error Intelligence**, **Commit 12 - Workers AI Integration**, **Commit 13 - Logging + Observability**, **Commit 14 - Agents Integration (Future)**

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+
+- Reworked README opening sections with beginner-friendly explanation of MCP, use cases, and quick start.
+- Added beginner onboarding guide at `docs/BEGINNER_GUIDE.md`.
+
 ## [1.0.0] - 2026-03-22
 
 ### Added

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "setup:local": "node scripts/setup-local.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "doctor": "node scripts/doctor.mjs",

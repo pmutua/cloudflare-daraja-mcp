@@ -134,12 +134,13 @@ preview_id = "<your-callbacks-kv-preview-id>"
 Quick local setup:
 
 ```bash
-cp .dev.vars.example .dev.vars
+npm run setup:local
 npm install
 npm run doctor
 ```
 
 The doctor command checks required Daraja and API key variables before starting the worker.
+Use `npm run doctor -- --strict` when you want missing required keys to fail fast.
 
 ```bash
 npm install

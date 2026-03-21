@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Tests
 
 - Added `tests/daraja.edge-cases.test.ts` for malformed callback phone metadata and minimal status payload edge cases.
+- Added automated coverage workflow using Vitest V8 provider and README coverage summary sync.
 
 ### Documentation
 

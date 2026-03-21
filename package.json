@@ -10,11 +10,14 @@
     "doctor": "node scripts/doctor.mjs",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "vitest run tests/e2e.routes.test.ts"
+    "test:e2e": "vitest run tests/e2e.routes.test.ts",
+    "test:coverage": "vitest run --coverage",
+    "coverage:update": "npm run test:coverage && node scripts/update-coverage-readme.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.13.3",
     "@cloudflare/workers-types": "^4.20260314.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "typescript": "^5.8.2",
     "vitest": "^4.1.0",
     "wrangler": "^4.8.0"

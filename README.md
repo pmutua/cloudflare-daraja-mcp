@@ -277,6 +277,27 @@ npm run dev
 npm test
 ```
 
+## Test Coverage Report
+
+Generate and refresh coverage report in README:
+
+```bash
+npm run coverage:update
+```
+
+<!-- coverage-report:start -->
+Last updated: 2026-03-21T23:07:57.344Z
+
+| Metric | Coverage | Covered | Total |
+| --- | ---: | ---: | ---: |
+| Statements | 52.39% | 219 | 418 |
+| Branches | 45.18% | 155 | 343 |
+| Functions | 54.28% | 38 | 70 |
+| Lines | 52.82% | 215 | 407 |
+
+Refresh with: `npm run coverage:update`
+<!-- coverage-report:end -->
+
 ## Deploy
 
 ```bash

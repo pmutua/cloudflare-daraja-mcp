@@ -4,5 +4,6 @@ dist/
 .env
 .env.*
 .dev.vars
+coverage/
 *.log
 LLM.TXT

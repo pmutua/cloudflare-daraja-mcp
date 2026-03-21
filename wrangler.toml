@@ -2,3 +2,9 @@ name = "daraja-mcp-server"
 main = "src/index.ts"
 compatibility_date = "2026-03-22"
 workers_dev = true
+
+# Configure before deploy:
+# [[kv_namespaces]]
+# binding = "USAGE"
+# id = "<your-usage-kv-namespace-id>"
+# preview_id = "<your-usage-kv-preview-id>"

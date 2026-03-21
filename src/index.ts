@@ -1,7 +1,9 @@
 import { getRegisteredTools, handleMcpRequest, MCP_SERVER_INFO } from "./mcp";
+import { checkAndIncrementDailyUsage } from "./rateLimit";
 
 export interface Env {
   API_KEY: string;
+  USAGE: KVNamespace;
 }
 
 function json(data: unknown, status = 200): Response {
@@ -32,6 +34,16 @@ function unauthorized(): Response {
   }, 401);
 }
 
+function rateLimited(remainingSeconds: number): Response {
+  return json({
+    ok: false,
+    error: "rate_limited",
+    message: "Daily request limit reached",
+    limitPerDay: 50,
+    retryAfterSeconds: remainingSeconds
+  }, 429);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -47,6 +59,11 @@ export default {
 
     if (!isAuthorized(request, env)) {
       return unauthorized();
+    }
+
+    const usage = await checkAndIncrementDailyUsage(env.USAGE);
+    if (!usage.allowed) {
+      return rateLimited(usage.retryAfterSeconds);
     }
 
     if (url.pathname === "/mcp") {

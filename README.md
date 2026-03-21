@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -15,6 +15,8 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - MCP transport endpoint: `/mcp`
 - Tool discovery endpoint: `GET /mcp/tools`
 - API key auth middleware for protected routes via `x-api-key`
+- KV-backed daily rate limiting middleware (`USAGE` namespace)
+- Request limit: `50` requests per UTC day
 
 ## Authentication
 
@@ -26,6 +28,19 @@ Set API key secret before deploy:
 ```bash
 wrangler secret put API_KEY
 ```
+
+## Rate Limiting (KV)
+
+Create a KV namespace and bind it as `USAGE` in your `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "USAGE"
+id = "<your-usage-kv-namespace-id>"
+preview_id = "<your-usage-kv-preview-id>"
+```
+
+If the daily quota is exhausted, protected endpoints return `429`.
 
 ## Run Locally
 

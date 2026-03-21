@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**, **Commit 10 - Simulation Tool**, **Commit 11 - Error Intelligence**, **Commit 12 - Workers AI Integration**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**, **Commit 10 - Simulation Tool**, **Commit 11 - Error Intelligence**, **Commit 12 - Workers AI Integration**, **Commit 13 - Logging + Observability**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -32,6 +32,8 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - Daraja error explanation tool: `explain_error_code`
 - Transaction log summary tool: `summarize_transaction_logs`
 - Optional Workers AI enhancement for natural language summaries
+- Structured request and error logging utilities
+- `DEBUG_MODE=true` enables request/error log emission
 
 ## Authentication
 

@@ -1,6 +1,7 @@
 import { getRegisteredTools, handleMcpRequest, MCP_SERVER_INFO } from "./mcp";
 import { checkAndIncrementDailyUsage } from "./rateLimit";
 import { handleDarajaCallback } from "./callback";
+import { buildErrorLog, buildRequestLog } from "./observability";
 
 export interface Env {
   API_KEY: string;
@@ -11,6 +12,7 @@ export interface Env {
   AI?: {
     run: (model: string, input: Record<string, unknown>) => Promise<Record<string, unknown>>;
   };
+  DEBUG_MODE?: string;
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;
@@ -62,45 +64,58 @@ function rateLimited(remainingSeconds: number): Response {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const isDebugMode = env.DEBUG_MODE === "true";
 
-    if (request.method === "GET" && url.pathname === "/health") {
+    try {
+      let response: Response;
+
+      if (request.method === "GET" && url.pathname === "/health") {
+        response = json({
+          ok: true,
+          service: MCP_SERVER_INFO.name,
+          status: "healthy",
+          timestamp: new Date().toISOString()
+        });
+      } else if (url.pathname === "/callback") {
+        response = await handleDarajaCallback(request, env.CALLBACKS);
+      } else if (!isAuthorized(request, env)) {
+        response = unauthorized();
+      } else {
+        const usage = await checkAndIncrementDailyUsage(env.USAGE);
+        if (!usage.allowed) {
+          response = rateLimited(usage.retryAfterSeconds);
+        } else if (url.pathname === "/mcp") {
+          response = await handleMcpRequest(request, env);
+        } else if (request.method === "GET" && url.pathname === "/mcp/tools") {
+          response = json({
+            ok: true,
+            server: MCP_SERVER_INFO,
+            tools: getRegisteredTools()
+          });
+        } else {
+          response = json({
+            ok: false,
+            error: "not_found",
+            message: "Route not found"
+          }, 404);
+        }
+      }
+
+      if (isDebugMode) {
+        console.log(JSON.stringify(buildRequestLog(request, response.status, { route: url.pathname })));
+      }
+
+      return response;
+    } catch (error) {
+      if (isDebugMode) {
+        console.error(JSON.stringify(buildErrorLog(request, error, { route: url.pathname })));
+      }
+
       return json({
-        ok: true,
-        service: MCP_SERVER_INFO.name,
-        status: "healthy",
-        timestamp: new Date().toISOString()
-      });
+        ok: false,
+        error: "internal_error",
+        message: "Unexpected server error"
+      }, 500);
     }
-
-    if (url.pathname === "/callback") {
-      return handleDarajaCallback(request, env.CALLBACKS);
-    }
-
-    if (!isAuthorized(request, env)) {
-      return unauthorized();
-    }
-
-    const usage = await checkAndIncrementDailyUsage(env.USAGE);
-    if (!usage.allowed) {
-      return rateLimited(usage.retryAfterSeconds);
-    }
-
-    if (url.pathname === "/mcp") {
-      return handleMcpRequest(request, env);
-    }
-
-    if (request.method === "GET" && url.pathname === "/mcp/tools") {
-      return json({
-        ok: true,
-        server: MCP_SERVER_INFO,
-        tools: getRegisteredTools()
-      });
-    }
-
-    return json({
-      ok: false,
-      error: "not_found",
-      message: "Route not found"
-    }, 404);
   }
 } satisfies ExportedHandler<Env>;

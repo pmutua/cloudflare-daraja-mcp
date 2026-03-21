@@ -9,6 +9,8 @@ This runbook defines a safe, repeatable release process for `daraja-mcp-server`.
 - For GitHub Actions deployment, repository or environment secrets are configured:
   - `CLOUDFLARE_API_TOKEN`
   - `CLOUDFLARE_ACCOUNT_ID`
+  - `SERVICE_BASE_URL` (full deployed URL used by smoke tests)
+  - `MCP_API_KEY` (API key used for authenticated `/mcp/tools` smoke test)
 - GitHub Environments exist:
   - `sandbox` for main branch deploys (Worker name: `daraja-mcp-server-sandbox`)
   - `production` for tag deploys (Worker name from `wrangler.toml`)
@@ -75,7 +77,8 @@ npm run deploy
 
 ## 5. Post-Deploy Smoke Checks
 
-Run quick endpoint verification against the deployed domain.
+GitHub Actions runs these checks automatically after deployment when environment secrets are configured.
+You can still run them manually for incident verification.
 
 1. `GET /health` returns HTTP `200` and `ok: true`.
 2. `GET /mcp/tools` returns tool list with HTTP `200` when `x-api-key` is valid.

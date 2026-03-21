@@ -18,3 +18,8 @@ workers_dev = true
 # binding = "TRANSACTIONS"
 # id = "<your-transactions-kv-namespace-id>"
 # preview_id = "<your-transactions-kv-preview-id>"
+
+# [[kv_namespaces]]
+# binding = "CALLBACKS"
+# id = "<your-callbacks-kv-namespace-id>"
+# preview_id = "<your-callbacks-kv-preview-id>"

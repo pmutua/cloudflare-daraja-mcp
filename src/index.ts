@@ -1,11 +1,13 @@
 import { getRegisteredTools, handleMcpRequest, MCP_SERVER_INFO } from "./mcp";
 import { checkAndIncrementDailyUsage } from "./rateLimit";
+import { handleDarajaCallback } from "./callback";
 
 export interface Env {
   API_KEY: string;
   USAGE: KVNamespace;
   TOKENS: KVNamespace;
   TRANSACTIONS: KVNamespace;
+  CALLBACKS: KVNamespace;
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;
@@ -65,6 +67,10 @@ export default {
         status: "healthy",
         timestamp: new Date().toISOString()
       });
+    }
+
+    if (url.pathname === "/callback") {
+      return handleDarajaCallback(request, env.CALLBACKS);
     }
 
     if (!isAuthorized(request, env)) {

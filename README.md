@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**, **Commit 8 - Payment Verification Layer**, **Commit 9 - Callback Handler**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -26,6 +26,8 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - Normalized response fields: `status`, `resultCode`, `responseCode`, `isComplete`
 - Payment verification tool: `verify_payment_intent`
 - Verification checks: amount matching and optional phone matching
+- Callback endpoint: `POST /callback`
+- Callback payload storage in KV (`CALLBACKS` namespace)
 
 ## Authentication
 
@@ -105,6 +107,19 @@ preview_id = "<your-transactions-kv-preview-id>"
 - `transactionDesc`
 - `callbackUrl` (optional override)
 - `transactionType` (optional override)
+
+Set your Daraja callback to this endpoint:
+
+- `https://<your-worker-domain>/callback`
+
+Add callback storage KV binding in `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "CALLBACKS"
+id = "<your-callbacks-kv-namespace-id>"
+preview_id = "<your-callbacks-kv-preview-id>"
+```
 
 ## Run Locally
 

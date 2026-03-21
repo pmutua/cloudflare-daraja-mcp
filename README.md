@@ -157,6 +157,11 @@ Use the production checklist in [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.m
 - deployment sequence (`terraform apply` and `npm run deploy`)
 - post-deploy smoke tests for `/health`, `/mcp/tools`, and callback routing
 
+Release governance documents:
+
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/VERSIONING.md](docs/VERSIONING.md)
+
 ## Health Check Response
 
 `GET /health`

@@ -10,6 +10,7 @@ import {
   verifyPaymentIntent
 } from "./daraja";
 import { summarizeTransactionLogs } from "./insights";
+import { createPaymentWorkflowPlan } from "./agents";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -251,5 +252,25 @@ registerTool(
   },
   {
     limit: z.number().int().positive().max(100).optional().describe("Max number of recent transaction logs to summarize.")
+  }
+);
+
+registerTool(
+  "orchestrate_payment_workflow",
+  "Creates a multi-agent payment workflow plan for orchestration.",
+  async (_, args) => {
+    const intent = args.intent === "check_status" ? "check_status" : "new_payment";
+    return createPaymentWorkflowPlan({
+      intent,
+      amount: typeof args.amount === "number" ? args.amount : undefined,
+      phoneNumber: typeof args.phoneNumber === "string" ? args.phoneNumber : undefined,
+      checkoutRequestId: typeof args.checkoutRequestId === "string" ? args.checkoutRequestId : undefined
+    });
+  },
+  {
+    intent: z.enum(["new_payment", "check_status"]).describe("Workflow intent for orchestration."),
+    amount: z.number().positive().optional().describe("Expected amount for new payment orchestration."),
+    phoneNumber: z.string().optional().describe("Optional phone for new payment orchestration."),
+    checkoutRequestId: z.string().optional().describe("Required when intent is check_status.")
   }
 );

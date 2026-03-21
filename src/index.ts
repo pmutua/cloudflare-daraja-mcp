@@ -5,10 +5,15 @@ export interface Env {
   API_KEY: string;
   USAGE: KVNamespace;
   TOKENS: KVNamespace;
+  TRANSACTIONS: KVNamespace;
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;
   DARAJA_BASE_URL?: string;
+  DARAJA_SHORTCODE?: string;
+  DARAJA_PASSKEY?: string;
+  DARAJA_CALLBACK_URL?: string;
+  DARAJA_TRANSACTION_TYPE?: string;
 }
 
 function json(data: unknown, status = 200): Response {

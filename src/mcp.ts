@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import { getDarajaAccessToken } from "./daraja";
+import { z } from "zod";
+import { getDarajaAccessToken, stkPush } from "./daraja";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -9,21 +10,30 @@ export const MCP_SERVER_INFO = {
 
 type ToolRuntimeEnv = {
   TOKENS: KVNamespace;
+  TRANSACTIONS: KVNamespace;
   DARAJA_CONSUMER_KEY?: string;
   DARAJA_CONSUMER_SECRET?: string;
   DARAJA_ENV?: string;
   DARAJA_BASE_URL?: string;
+  DARAJA_SHORTCODE?: string;
+  DARAJA_PASSKEY?: string;
+  DARAJA_CALLBACK_URL?: string;
+  DARAJA_TRANSACTION_TYPE?: string;
 };
 
 type ToolContext = {
   env: ToolRuntimeEnv;
 };
 
-type ToolHandler = (context: ToolContext) => Promise<Record<string, unknown>> | Record<string, unknown>;
+type ToolHandler = (
+  context: ToolContext,
+  args: Record<string, unknown>
+) => Promise<Record<string, unknown>> | Record<string, unknown>;
 
 type ToolDefinition = {
   name: string;
   description: string;
+  inputSchema?: z.ZodRawShape;
   handler: ToolHandler;
 };
 
@@ -34,8 +44,13 @@ type RegisteredTool = {
 
 const registeredTools = new Map<string, ToolDefinition>();
 
-export function registerTool(name: string, description: string, handler: ToolHandler): void {
-  registeredTools.set(name, { name, description, handler });
+export function registerTool(
+  name: string,
+  description: string,
+  handler: ToolHandler,
+  inputSchema?: z.ZodRawShape
+): void {
+  registeredTools.set(name, { name, description, handler, inputSchema });
 }
 
 export function getRegisteredTools(): RegisteredTool[] {
@@ -53,11 +68,13 @@ function createMcpServer(env: ToolRuntimeEnv): McpServer {
     server.registerTool(
       tool.name,
       {
-        description: tool.description
+        description: tool.description,
+        inputSchema: tool.inputSchema
       },
-      async () => {
+      async (args) => {
         try {
-          const result = await tool.handler({ env });
+          const normalizedArgs = (args ?? {}) as Record<string, unknown>;
+          const result = await tool.handler({ env }, normalizedArgs);
           return {
             content: [
               {
@@ -119,4 +136,30 @@ registerTool(
   "get_access_token",
   "Generates and returns a Daraja OAuth access token (cached in TOKENS KV).",
   async ({ env }) => getDarajaAccessToken(env)
+);
+
+registerTool(
+  "stk_push",
+  "Initiates an M-Pesa STK Push request and logs transaction metadata to KV.",
+  async ({ env }, args) => {
+    return stkPush(env, {
+      amount: Number(args.amount),
+      phoneNumber: String(args.phoneNumber ?? ""),
+      accountReference: String(args.accountReference ?? ""),
+      transactionDesc: String(args.transactionDesc ?? ""),
+      callbackUrl: typeof args.callbackUrl === "string" ? args.callbackUrl : undefined,
+      transactionType: typeof args.transactionType === "string" ? args.transactionType : undefined
+    });
+  },
+  {
+    amount: z.number().positive().describe("Amount to charge, positive whole number."),
+    phoneNumber: z.string().describe("Customer phone number in 2547XXXXXXXX or 07XXXXXXXX format."),
+    accountReference: z.string().min(1).max(12).describe("Reference shown to customer, max 12 chars."),
+    transactionDesc: z.string().min(1).max(13).describe("Short transaction description, max 13 chars."),
+    callbackUrl: z.string().url().optional().describe("Optional callback URL override."),
+    transactionType: z
+      .enum(["CustomerPayBillOnline", "CustomerBuyGoodsOnline"])
+      .optional()
+      .describe("Daraja STK transaction type.")
+  }
 );

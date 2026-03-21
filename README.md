@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -19,6 +19,9 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - Request limit: `50` requests per UTC day
 - Daraja OAuth token tool: `get_access_token`
 - Token caching in KV (`TOKENS` namespace)
+- STK Push tool: `stk_push`
+- Daraja STK password generation: `Base64(shortCode + passkey + timestamp)`
+- STK request/response logging in KV (`TRANSACTIONS` namespace)
 
 ## Authentication
 
@@ -66,6 +69,38 @@ binding = "TOKENS"
 id = "<your-tokens-kv-namespace-id>"
 preview_id = "<your-tokens-kv-preview-id>"
 ```
+
+## STK Push
+
+Required configuration:
+
+```bash
+wrangler secret put DARAJA_SHORTCODE
+wrangler secret put DARAJA_PASSKEY
+wrangler secret put DARAJA_CALLBACK_URL
+```
+
+Optional:
+
+- `DARAJA_TRANSACTION_TYPE` = `CustomerPayBillOnline` (default) or `CustomerBuyGoodsOnline`
+
+Add transaction log KV binding in `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "TRANSACTIONS"
+id = "<your-transactions-kv-namespace-id>"
+preview_id = "<your-transactions-kv-preview-id>"
+```
+
+`stk_push` input fields:
+
+- `amount`
+- `phoneNumber`
+- `accountReference`
+- `transactionDesc`
+- `callbackUrl` (optional override)
+- `transactionType` (optional override)
 
 ## Run Locally
 

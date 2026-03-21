@@ -13,3 +13,8 @@ workers_dev = true
 # binding = "TOKENS"
 # id = "<your-tokens-kv-namespace-id>"
 # preview_id = "<your-tokens-kv-preview-id>"
+
+# [[kv_namespaces]]
+# binding = "TRANSACTIONS"
+# id = "<your-transactions-kv-namespace-id>"
+# preview_id = "<your-transactions-kv-preview-id>"

@@ -6,18 +6,18 @@ This document explains the system architecture visually and shows practical usag
 
 ```mermaid
 flowchart LR
-    A[AI Client or MCP Host\nCopilot, Agent, or App] -->|MCP tool call| B[Daraja MCP Server\nCloudflare Worker]
+  A["AI Client or MCP Host<br/>Copilot, Agent, or App"] -->|MCP tool call| B["Daraja MCP Server<br/>Cloudflare Worker"]
     B --> C{Security and Control Layer}
     C -->|API key check| D[Protected MCP routes]
     C -->|daily quota check| D
-    B --> E[Tool Runtime\nget_access_token, stk_push, status, verify]
+  B --> E["Tool Runtime<br/>get_access_token, stk_push, status, verify"]
     E --> F[Safaricom Daraja APIs]
     E --> G[Cloudflare KV]
     G --> G1[USAGE]
     G --> G2[TOKENS]
     G --> G3[TRANSACTIONS]
     G --> G4[CALLBACKS]
-    F -->|payment callback| H[/callback endpoint]
+  F -->|payment callback| H[callback endpoint]
     H --> G4
 ```
 

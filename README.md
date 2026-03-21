@@ -94,35 +94,37 @@ If you want a strict config check that fails on missing required values, run: `n
 
 ## Beginner Learning Links
 
+Legend: Beginner = no prior MCP knowledge needed. Intermediate = some prior context helps.
+
 MCP fundamentals:
 
-- MCP introduction: https://modelcontextprotocol.io/introduction
-- MCP architecture concepts: https://modelcontextprotocol.io/docs/learn/architecture
-- MCP specification: https://spec.modelcontextprotocol.io/
+- MCP introduction (Beginner, ~10 min): https://modelcontextprotocol.io/introduction
+- MCP architecture concepts (Beginner, ~15 min): https://modelcontextprotocol.io/docs/learn/architecture
+- MCP specification (Intermediate, ~20-30 min skim): https://spec.modelcontextprotocol.io/
 
 Cloudflare basics for this project:
 
-- Cloudflare Workers overview: https://developers.cloudflare.com/workers/
-- Wrangler CLI docs: https://developers.cloudflare.com/workers/wrangler/
-- Workers KV getting started: https://developers.cloudflare.com/kv/get-started/
-- Workers bindings overview: https://developers.cloudflare.com/workers/runtime-apis/bindings/
+- Cloudflare Workers overview (Beginner, ~10 min): https://developers.cloudflare.com/workers/
+- Wrangler CLI docs (Beginner, ~15 min): https://developers.cloudflare.com/workers/wrangler/
+- Workers KV getting started (Beginner, ~15 min): https://developers.cloudflare.com/kv/get-started/
+- Workers bindings overview (Intermediate, ~15 min): https://developers.cloudflare.com/workers/runtime-apis/bindings/
 
 Daraja and M-Pesa docs:
 
-- Safaricom developer portal: https://developer.safaricom.co.ke/
-- Daraja APIs catalog: https://developer.safaricom.co.ke/apis
-- Daraja Getting Started: https://developer.safaricom.co.ke/apis/GettingStarted
-- Daraja Authorization (OAuth): https://developer.safaricom.co.ke/apis/Authorization
+- Safaricom developer portal (Beginner, ~5 min): https://developer.safaricom.co.ke/
+- Daraja APIs catalog (Beginner, ~10 min): https://developer.safaricom.co.ke/apis
+- Daraja Getting Started (Beginner, ~15 min): https://developer.safaricom.co.ke/apis/GettingStarted
+- Daraja Authorization OAuth (Intermediate, ~10 min): https://developer.safaricom.co.ke/apis/Authorization
 
 MCP clients and tooling:
 
-- Use MCP servers in VS Code: https://code.visualstudio.com/docs/copilot/chat/mcp-servers
-- MCP configuration in VS Code: https://code.visualstudio.com/docs/copilot/reference/mcp-configuration
+- Use MCP servers in VS Code (Beginner, ~15 min): https://code.visualstudio.com/docs/copilot/chat/mcp-servers
+- MCP configuration in VS Code (Intermediate, ~15 min): https://code.visualstudio.com/docs/copilot/reference/mcp-configuration
 
 Diagrams and visuals:
 
-- Mermaid intro: https://mermaid.js.org/intro/
-- Mermaid live editor: https://mermaid.live/edit
+- Mermaid intro (Beginner, ~10 min): https://mermaid.js.org/intro/
+- Mermaid live editor (Beginner, hands-on): https://mermaid.live/edit
 
 ## Current Status
 

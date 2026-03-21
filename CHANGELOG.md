@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Added beginner onboarding guide at `docs/BEGINNER_GUIDE.md`.
 - Added architecture guide with Mermaid diagrams, sequence flow, and usage examples at `docs/ARCHITECTURE.md`.
 - Added curated official learning links for MCP, Cloudflare Workers/KV, Daraja, VS Code MCP usage, and Mermaid.
+- Added difficulty labels and estimated reading time to beginner learning links.
 
 ## [1.0.0] - 2026-03-22
 

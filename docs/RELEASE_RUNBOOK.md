@@ -6,6 +6,9 @@ This runbook defines a safe, repeatable release process for `daraja-mcp-server`.
 
 - You are on `main` with a clean working tree for release files.
 - Cloudflare credentials are available for Terraform and Wrangler.
+- For GitHub Actions deployment, repository or environment secrets are configured:
+  - `CLOUDFLARE_API_TOKEN`
+  - `CLOUDFLARE_ACCOUNT_ID`
 - Required secrets are set in the target Worker:
   - `API_KEY`
   - `DARAJA_CONSUMER_KEY`

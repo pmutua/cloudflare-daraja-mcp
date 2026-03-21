@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -14,6 +14,18 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**
 - Basic tool registration with initial `get_usage_status` tool
 - MCP transport endpoint: `/mcp`
 - Tool discovery endpoint: `GET /mcp/tools`
+- API key auth middleware for protected routes via `x-api-key`
+
+## Authentication
+
+- Protected routes require header: `x-api-key: <your_api_key>`
+- Public route: `GET /health`
+
+Set API key secret before deploy:
+
+```bash
+wrangler secret put API_KEY
+```
 
 ## Run Locally
 

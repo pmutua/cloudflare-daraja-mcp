@@ -1,6 +1,8 @@
 import { getRegisteredTools, handleMcpRequest, MCP_SERVER_INFO } from "./mcp";
 
-export interface Env {}
+export interface Env {
+  API_KEY: string;
+}
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -12,8 +14,26 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+function isAuthorized(request: Request, env: Env): boolean {
+  const configuredApiKey = env.API_KEY;
+  if (!configuredApiKey) {
+    return false;
+  }
+
+  const providedApiKey = request.headers.get("x-api-key");
+  return providedApiKey === configuredApiKey;
+}
+
+function unauthorized(): Response {
+  return json({
+    ok: false,
+    error: "unauthorized",
+    message: "Missing or invalid API key"
+  }, 401);
+}
+
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === "GET" && url.pathname === "/health") {
@@ -23,6 +43,10 @@ export default {
         status: "healthy",
         timestamp: new Date().toISOString()
       });
+    }
+
+    if (!isAuthorized(request, env)) {
+      return unauthorized();
     }
 
     if (url.pathname === "/mcp") {

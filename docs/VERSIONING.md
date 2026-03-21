@@ -17,6 +17,7 @@ Use annotated tags with `v` prefix:
 - `v1.1.0`
 
 The deploy workflow is triggered by tags that match `v*`.
+The release workflow also runs on `v*` tags and publishes a GitHub Release entry.
 
 ## Release Procedure
 
@@ -30,4 +31,5 @@ git push origin v1.0.0
 ```
 
 4. Confirm deployment workflow success.
-5. Run post-deploy smoke checks from [docs/RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md).
+5. Confirm release workflow success and generated GitHub Release notes.
+6. Run post-deploy smoke checks from [docs/RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md).

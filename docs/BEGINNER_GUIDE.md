@@ -85,3 +85,30 @@ Not ideal when:
 - Version and release process: [docs/VERSIONING.md](VERSIONING.md)
 - Architecture diagrams and examples: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Change history: [CHANGELOG.md](../CHANGELOG.md)
+
+## 9. Curated Learning Resources
+
+Start with these in order if you are new:
+
+1. What MCP is and why it matters:
+	- https://modelcontextprotocol.io/introduction
+2. How MCP is structured (client, server, tools, transport):
+	- https://modelcontextprotocol.io/docs/learn/architecture
+3. Formal MCP spec reference:
+	- https://spec.modelcontextprotocol.io/
+4. How to use MCP servers in VS Code:
+	- https://code.visualstudio.com/docs/copilot/chat/mcp-servers
+5. Cloudflare Workers fundamentals:
+	- https://developers.cloudflare.com/workers/
+6. Wrangler CLI commands and configuration:
+	- https://developers.cloudflare.com/workers/wrangler/
+7. Workers KV getting started:
+	- https://developers.cloudflare.com/kv/get-started/
+8. Safaricom Daraja docs home:
+	- https://developer.safaricom.co.ke/
+9. Daraja API catalog and onboarding:
+	- https://developer.safaricom.co.ke/apis
+	- https://developer.safaricom.co.ke/apis/GettingStarted
+10. Mermaid diagrams for architecture docs:
+	- https://mermaid.js.org/intro/
+	- https://mermaid.live/edit

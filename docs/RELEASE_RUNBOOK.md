@@ -9,6 +9,9 @@ This runbook defines a safe, repeatable release process for `daraja-mcp-server`.
 - For GitHub Actions deployment, repository or environment secrets are configured:
   - `CLOUDFLARE_API_TOKEN`
   - `CLOUDFLARE_ACCOUNT_ID`
+- GitHub Environments exist:
+  - `sandbox` for main branch deploys (Worker name: `daraja-mcp-server-sandbox`)
+  - `production` for tag deploys (Worker name from `wrangler.toml`)
 - Required secrets are set in the target Worker:
   - `API_KEY`
   - `DARAJA_CONSUMER_KEY`
@@ -54,6 +57,13 @@ cd ../..
 Capture outputs, especially `wrangler_kv_snippet`, and keep `wrangler.toml` in sync.
 
 ## 4. Deploy Worker
+
+Preferred path (GitHub Actions staged deployment):
+
+1. Push to `main` to deploy sandbox automatically.
+2. Create and push a version tag (`v*`) to deploy production.
+
+Manual fallback (local):
 
 Deploy application code:
 

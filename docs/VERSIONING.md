@@ -16,7 +16,11 @@ Use annotated tags with `v` prefix:
 - `v1.0.1`
 - `v1.1.0`
 
-The deploy workflow is triggered by tags that match `v*`.
+The deploy workflow runs in stages:
+
+- push to `main` deploys sandbox
+- push tag `v*` deploys production
+
 The release workflow also runs on `v*` tags and publishes a GitHub Release entry.
 
 ## Release Procedure

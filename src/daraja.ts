@@ -292,6 +292,14 @@ function extractActualPhoneNumber(raw: Record<string, unknown>): string | null {
   return null;
 }
 
+function normalizePhoneNumberOrNull(phoneNumber: string): string | null {
+  try {
+    return normalizePhoneNumber(phoneNumber);
+  } catch {
+    return null;
+  }
+}
+
 export async function getDarajaAccessToken(env: DarajaEnv): Promise<Record<string, unknown>> {
   const consumerKey = env.DARAJA_CONSUMER_KEY;
   const consumerSecret = env.DARAJA_CONSUMER_SECRET;
@@ -661,7 +669,7 @@ export function evaluatePaymentIntent(
       : "mismatch";
 
   const actualPhoneRaw = extractActualPhoneNumber(status.raw);
-  const actualPhoneNumber = actualPhoneRaw ? normalizePhoneNumber(actualPhoneRaw) : null;
+  const actualPhoneNumber = actualPhoneRaw ? normalizePhoneNumberOrNull(actualPhoneRaw) : null;
   const phoneMatch = expectedPhoneNumber === null
     ? "unknown"
     : actualPhoneNumber === null

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Hardened payment intent verification to gracefully handle malformed callback phone values without throwing.
+
+### Tests
+
+- Added `tests/daraja.edge-cases.test.ts` for malformed callback phone metadata and minimal status payload edge cases.
+
 ### Documentation
 
 - Reworked README opening sections with beginner-friendly explanation of MCP, use cases, and quick start.

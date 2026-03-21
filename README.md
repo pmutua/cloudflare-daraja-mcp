@@ -4,7 +4,7 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, **Commit 3 - API Key Auth**, **Commit 4 - Rate Limiting (KV)**, **Commit 5 - OAuth Token (Daraja)**, **Commit 6 - STK Push**, **Commit 7 - Transaction Status**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
@@ -22,6 +22,8 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - STK Push tool: `stk_push`
 - Daraja STK password generation: `Base64(shortCode + passkey + timestamp)`
 - STK request/response logging in KV (`TRANSACTIONS` namespace)
+- Transaction status tool: `check_transaction_status`
+- Normalized response fields: `status`, `resultCode`, `responseCode`, `isComplete`
 
 ## Authentication
 
@@ -107,6 +109,12 @@ preview_id = "<your-transactions-kv-preview-id>"
 ```bash
 npm install
 npm run dev
+```
+
+## Test (TDD)
+
+```bash
+npm test
 ```
 
 ## Deploy

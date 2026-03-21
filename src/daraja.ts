@@ -34,6 +34,21 @@ export type StkPushInput = {
   transactionType?: string;
 };
 
+export type TransactionStatusInput = {
+  checkoutRequestId: string;
+};
+
+export type NormalizedTransactionStatus = {
+  status: "pending" | "success" | "failed" | "unknown";
+  isComplete: boolean;
+  checkoutRequestId: string | null;
+  merchantRequestId: string | null;
+  resultCode: number | null;
+  responseCode: number | null;
+  message: string;
+  raw: Record<string, unknown>;
+};
+
 function twoDigits(value: number): string {
   return value.toString().padStart(2, "0");
 }
@@ -117,6 +132,21 @@ function toPositiveInteger(value: unknown, fallback: number): number {
     return fallback;
   }
   return Math.floor(parsed);
+}
+
+function toOptionalNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return null;
 }
 
 export async function getDarajaAccessToken(env: DarajaEnv): Promise<Record<string, unknown>> {
@@ -324,4 +354,119 @@ export async function stkPush(env: DarajaEnv, input: StkPushInput): Promise<Reco
     base_url: baseUrl,
     timestamp
   };
+}
+
+export function normalizeDarajaTransactionStatus(payload: Record<string, unknown>): NormalizedTransactionStatus {
+  const resultCode = toOptionalNumber(payload.ResultCode);
+  const responseCode = toOptionalNumber(payload.ResponseCode);
+  const checkoutRequestId = typeof payload.CheckoutRequestID === "string" ? payload.CheckoutRequestID : null;
+  const merchantRequestId = typeof payload.MerchantRequestID === "string" ? payload.MerchantRequestID : null;
+
+  let status: NormalizedTransactionStatus["status"] = "unknown";
+  if (resultCode === 0) {
+    status = "success";
+  } else if (resultCode !== null) {
+    status = "failed";
+  } else if (responseCode === 0) {
+    status = "pending";
+  } else if (responseCode !== null) {
+    status = "failed";
+  }
+
+  const message =
+    (typeof payload.ResultDesc === "string" && payload.ResultDesc) ||
+    (typeof payload.ResponseDescription === "string" && payload.ResponseDescription) ||
+    (typeof payload.CustomerMessage === "string" && payload.CustomerMessage) ||
+    "No status message returned by Daraja.";
+
+  return {
+    status,
+    isComplete: resultCode !== null,
+    checkoutRequestId,
+    merchantRequestId,
+    resultCode,
+    responseCode,
+    message,
+    raw: payload
+  };
+}
+
+export async function checkTransactionStatus(
+  env: DarajaEnv,
+  input: TransactionStatusInput
+): Promise<NormalizedTransactionStatus> {
+  const shortCode = ensureConfigured(env.DARAJA_SHORTCODE, "DARAJA_SHORTCODE");
+  const passkey = ensureConfigured(env.DARAJA_PASSKEY, "DARAJA_PASSKEY");
+  const checkoutRequestId = input.checkoutRequestId.trim();
+
+  if (!checkoutRequestId) {
+    throw new Error("checkoutRequestId is required.");
+  }
+
+  const tokenResult = await getDarajaAccessToken(env);
+  const accessToken = typeof tokenResult.access_token === "string" ? tokenResult.access_token : undefined;
+
+  if (!accessToken) {
+    throw new Error("Unable to obtain Daraja access token.");
+  }
+
+  const timestamp = getNairobiTimestamp(new Date());
+  const password = makePassword(shortCode, passkey, timestamp);
+  const baseUrl = resolveDarajaBaseUrl(env);
+  const endpoint = `${baseUrl}/mpesa/stkpushquery/v1/query`;
+
+  const payload = {
+    BusinessShortCode: shortCode,
+    Password: password,
+    Timestamp: timestamp,
+    CheckoutRequestID: checkoutRequestId
+  };
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const responseText = await response.text();
+  let responsePayload: Record<string, unknown> = {};
+  if (responseText) {
+    try {
+      responsePayload = JSON.parse(responseText) as Record<string, unknown>;
+    } catch {
+      responsePayload = { raw: responseText };
+    }
+  }
+
+  const normalized = normalizeDarajaTransactionStatus(responsePayload);
+
+  const logKey = `status:${new Date().toISOString().slice(0, 10)}:${checkoutRequestId}`;
+  await env.TRANSACTIONS.put(
+    logKey,
+    JSON.stringify({
+      request: {
+        ...payload,
+        Password: "***masked***"
+      },
+      responseStatus: response.status,
+      normalized,
+      recordedAt: new Date().toISOString()
+    }),
+    {
+      expirationTtl: 60 * 60 * 24 * 30
+    }
+  );
+
+  if (!response.ok) {
+    const details = typeof responsePayload.errorMessage === "string"
+      ? responsePayload.errorMessage
+      : responseText || `STK status query failed with status ${response.status}`;
+    throw new Error(`Daraja STK query failed (${response.status}): ${details}`);
+  }
+
+  return normalized;
 }

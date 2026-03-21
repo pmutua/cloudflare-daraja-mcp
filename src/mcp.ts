@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
-import { getDarajaAccessToken, stkPush } from "./daraja";
+import { checkTransactionStatus, getDarajaAccessToken, stkPush } from "./daraja";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
@@ -161,5 +161,18 @@ registerTool(
       .enum(["CustomerPayBillOnline", "CustomerBuyGoodsOnline"])
       .optional()
       .describe("Daraja STK transaction type.")
+  }
+);
+
+registerTool(
+  "check_transaction_status",
+  "Queries Daraja for STK transaction status and returns a normalized response.",
+  async ({ env }, args) => {
+    return checkTransactionStatus(env, {
+      checkoutRequestId: String(args.checkoutRequestId ?? "")
+    });
+  },
+  {
+    checkoutRequestId: z.string().min(1).describe("CheckoutRequestID returned from stk_push.")
   }
 );

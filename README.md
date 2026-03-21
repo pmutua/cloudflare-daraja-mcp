@@ -4,11 +4,16 @@ Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Da
 
 ## Current Status
 
-Implemented: **Commit 1 - Project Bootstrap**
+Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**
 
 - Cloudflare Worker project scaffold
 - Basic `fetch` handler
 - Health endpoint: `GET /health`
+- MCP SDK integrated (`@modelcontextprotocol/sdk`)
+- MCP server configured as `daraja-mcp-server` v`1.0.0`
+- Basic tool registration with initial `get_usage_status` tool
+- MCP transport endpoint: `/mcp`
+- Tool discovery endpoint: `GET /mcp/tools`
 
 ## Run Locally
 

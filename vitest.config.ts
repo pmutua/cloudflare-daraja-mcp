@@ -6,7 +6,15 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      reporter: ["text-summary", "json-summary", "html", "lcov"]
+      reporter: ["text-summary", "json-summary", "html", "lcov"],
+      thresholds: {
+        global: {
+          statements: 80,
+          lines: 80,
+          functions: 80,
+          branches: 60
+        }
+      }
     }
   }
 });

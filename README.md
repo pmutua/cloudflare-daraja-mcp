@@ -1,6 +1,6 @@
 # Daraja MCP Server
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/MdG3vm9TVnPbhbkUBLQymJ/NMC3yRBHbp3oGfRexkfvF1/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/MdG3vm9TVnPbhbkUBLQymJ/NMC3yRBHbp3oGfRexkfvF1/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/pmutua/cloudflare-daraja-mcp/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/pmutua/cloudflare-daraja-mcp/tree/main)
 [![codecov](https://codecov.io/github/pmutua/contact-form-cloudflare-worker/graph/badge.svg?token=UVN01PGU8D)](https://codecov.io/github/pmutua/contact-form-cloudflare-worker)
 
 Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Daraja) APIs as AI-callable tools.

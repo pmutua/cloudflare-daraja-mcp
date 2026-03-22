@@ -8,6 +8,7 @@ type CallbackStore = {
   ): Promise<void>;
 };
 
+/** Builds a JSON response with standard no-store headers. */
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -18,6 +19,7 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+/** Extracts CheckoutRequestID from either direct or nested stkCallback payload shapes. */
 function extractCheckoutRequestId(payload: Record<string, unknown>): string {
   const directId = payload.CheckoutRequestID;
   if (typeof directId === "string" && directId.trim().length > 0) {
@@ -38,6 +40,9 @@ function extractCheckoutRequestId(payload: Record<string, unknown>): string {
   return crypto.randomUUID();
 }
 
+/**
+ * Accepts Daraja callback payloads, stores them in KV, and returns acknowledgement.
+ */
 export async function handleDarajaCallback(request: Request, callbacksKv: CallbackStore): Promise<Response> {
   if (request.method !== "POST") {
     return json({

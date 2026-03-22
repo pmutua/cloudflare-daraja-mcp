@@ -56,6 +56,9 @@ type RegisteredTool = {
 
 const registeredTools = new Map<string, ToolDefinition>();
 
+/**
+ * Registers an MCP tool and its runtime handler in the in-memory tool registry.
+ */
 export function registerTool(
   name: string,
   description: string,
@@ -65,6 +68,7 @@ export function registerTool(
   registeredTools.set(name, { name, description, handler, inputSchema });
 }
 
+/** Returns lightweight metadata for all currently registered tools. */
 export function getRegisteredTools(): RegisteredTool[] {
   return Array.from(registeredTools.values()).map(({ name, description }) => ({ name, description }));
 }
@@ -120,6 +124,9 @@ function createMcpServer(env: ToolRuntimeEnv): McpServer {
   return server;
 }
 
+/**
+ * Handles MCP HTTP requests by creating a transport-bound server for each request.
+ */
 export async function handleMcpRequest(request: Request, env: ToolRuntimeEnv): Promise<Response> {
   const server = createMcpServer(env);
   const transport = new WebStandardStreamableHTTPServerTransport({

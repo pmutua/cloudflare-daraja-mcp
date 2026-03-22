@@ -14,10 +14,12 @@ export type RateLimitResult = {
   retryAfterSeconds: number;
 };
 
+/** Returns a date key in UTC used for daily usage partitions. */
 function getUtcDayKey(now: Date): string {
   return now.toISOString().slice(0, 10);
 }
 
+/** Computes the remaining seconds until the next UTC day boundary. */
 function secondsUntilNextUtcMidnight(now: Date): number {
   const next = new Date(now);
   next.setUTCHours(24, 0, 0, 0);
@@ -29,6 +31,9 @@ function buildUsageKey(dayKey: string): string {
   return `usage:${dayKey}`;
 }
 
+/**
+ * Applies a per-day usage limit and increments usage when still allowed.
+ */
 export async function checkAndIncrementDailyUsage(usageKv: KVNamespace): Promise<RateLimitResult> {
   const now = new Date();
   const dayKey = getUtcDayKey(now);

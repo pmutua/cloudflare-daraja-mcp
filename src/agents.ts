@@ -1,5 +1,6 @@
 export type WorkflowIntent = "new_payment" | "check_status";
 
+/** Input contract for building an agent workflow plan. */
 export type PaymentWorkflowInput = {
   intent: WorkflowIntent;
   amount?: number;
@@ -20,6 +21,9 @@ export type PaymentWorkflowPlan = {
   steps: WorkflowStep[];
 };
 
+/**
+ * Produces a deterministic multi-step plan for either payment initiation or status checks.
+ */
 export function createPaymentWorkflowPlan(input: PaymentWorkflowInput): PaymentWorkflowPlan {
   if (input.intent === "check_status") {
     return {

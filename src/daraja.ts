@@ -144,6 +144,7 @@ type CachedToken = {
   baseUrl: string;
 };
 
+/** Runtime configuration required by Daraja integration functions. */
 export type DarajaEnv = {
   TOKENS: KVNamespace;
   TRANSACTIONS: KVNamespace;
@@ -157,6 +158,7 @@ export type DarajaEnv = {
   DARAJA_TRANSACTION_TYPE?: string;
 };
 
+/** Input accepted by STK push initiation. */
 export type StkPushInput = {
   amount: number;
   phoneNumber: string;
@@ -167,10 +169,12 @@ export type StkPushInput = {
   partyB?: string;
 };
 
+/** Input used to query a single STK transaction status. */
 export type TransactionStatusInput = {
   checkoutRequestId: string;
 };
 
+/** Normalized status model returned after interpreting Daraja query payloads. */
 export type NormalizedTransactionStatus = {
   status: "pending" | "success" | "failed" | "unknown";
   isComplete: boolean;
@@ -182,17 +186,20 @@ export type NormalizedTransactionStatus = {
   raw: Record<string, unknown>;
 };
 
+/** Input for end-to-end payment intent verification. */
 export type VerifyPaymentIntentInput = {
   checkoutRequestId: string;
   expectedAmount: number;
   expectedPhoneNumber?: string;
 };
 
+/** Internal evaluation input once transaction status has been obtained. */
 export type PaymentIntentEvaluationInput = {
   expectedAmount: number;
   expectedPhoneNumber?: string;
 };
 
+/** Verification result used by agents to decide fulfillment actions. */
 export type PaymentIntentVerification = {
   state: "pending" | "verified" | "unverified" | "failed";
   verified: boolean;
@@ -207,6 +214,7 @@ export type PaymentIntentVerification = {
   status: NormalizedTransactionStatus;
 };
 
+/** Input for deterministic local simulation, without upstream Daraja calls. */
 export type SimulatePaymentInput = {
   amount: number;
   phoneNumber: string;
@@ -215,6 +223,7 @@ export type SimulatePaymentInput = {
   outcome?: "pending" | "success" | "failed";
 };
 
+/** Human-readable mapping output for Daraja error/result codes. */
 export type DarajaErrorExplanation = {
   found: boolean;
   code: number | string;
@@ -399,6 +408,9 @@ function normalizePhoneNumberOrNull(phoneNumber: string): string | null {
   }
 }
 
+/**
+ * Returns a Daraja OAuth token, preferring a cached token in KV when still valid.
+ */
 export async function getDarajaAccessToken(env: DarajaEnv): Promise<Record<string, unknown>> {
   const consumerKey = env.DARAJA_CONSUMER_KEY;
   const consumerSecret = env.DARAJA_CONSUMER_SECRET;
@@ -509,6 +521,9 @@ async function logStkPushAttempt(
   );
 }
 
+/**
+ * Initiates an STK push request and stores a masked request/response audit log in KV.
+ */
 export async function stkPush(env: DarajaEnv, input: StkPushInput): Promise<Record<string, unknown>> {
   const shortCode = ensureConfigured(env.DARAJA_SHORTCODE, "DARAJA_SHORTCODE");
   const passkey = ensureConfigured(env.DARAJA_PASSKEY, "DARAJA_PASSKEY");
@@ -607,6 +622,9 @@ export async function stkPush(env: DarajaEnv, input: StkPushInput): Promise<Reco
   };
 }
 
+/**
+ * Converts raw Daraja status/query payloads into a deterministic status contract.
+ */
 export function normalizeDarajaTransactionStatus(payload: Record<string, unknown>): NormalizedTransactionStatus {
   const resultCode = toOptionalNumber(payload.ResultCode);
   const responseCode = toOptionalNumber(payload.ResponseCode);
@@ -722,6 +740,9 @@ export async function checkTransactionStatus(
   return normalized;
 }
 
+/**
+ * Evaluates whether a completed payment matches expected amount and optional phone identity.
+ */
 export function evaluatePaymentIntent(
   status: NormalizedTransactionStatus,
   input: PaymentIntentEvaluationInput
@@ -823,6 +844,9 @@ export async function verifyPaymentIntent(
   });
 }
 
+/**
+ * Produces a predictable simulated payment outcome for local development and demos.
+ */
 export async function simulatePayment(input: SimulatePaymentInput): Promise<Record<string, unknown>> {
   const amount = normalizeAmount(input.amount);
   const phoneNumber = normalizePhoneNumber(input.phoneNumber);
@@ -889,6 +913,9 @@ export async function simulatePayment(input: SimulatePaymentInput): Promise<Reco
   };
 }
 
+/**
+ * Explains known Daraja numeric/string codes and returns recommended operator actions.
+ */
 export function explainDarajaErrorCode(code: number | string): DarajaErrorExplanation {
   const normalizedInput = typeof code === "string" ? code.trim() : code;
 

@@ -7,6 +7,7 @@ function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEYS.some((sensitive) => normalized.includes(sensitive));
 }
 
+/** Recursively masks sensitive values before writing diagnostic logs. */
 export function sanitizeSensitive(input: JsonLike): JsonLike {
   const output: JsonLike = {};
 
@@ -27,6 +28,7 @@ export function sanitizeSensitive(input: JsonLike): JsonLike {
   return output;
 }
 
+/** Creates a structured request log object safe for DEBUG_MODE output. */
 export function buildRequestLog(request: Request, status: number, context: JsonLike = {}): JsonLike {
   const url = new URL(request.url);
   return {
@@ -40,6 +42,7 @@ export function buildRequestLog(request: Request, status: number, context: JsonL
   };
 }
 
+/** Creates a structured error log object with sanitized context fields. */
 export function buildErrorLog(request: Request, error: unknown, context: JsonLike = {}): JsonLike {
   const url = new URL(request.url);
   const message = error instanceof Error ? error.message : "Unknown error";

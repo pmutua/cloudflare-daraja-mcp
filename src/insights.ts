@@ -28,6 +28,7 @@ type ListableKv = {
   get(key: string): Promise<string | null>;
 };
 
+/** Generates deterministic aggregate metrics from transaction log records. */
 export function generateTransactionSummary(records: TransactionRecord[]): SummaryResult {
   const byType: Record<string, number> = {};
   let successfulHttp = 0;
@@ -53,6 +54,9 @@ export function generateTransactionSummary(records: TransactionRecord[]): Summar
   };
 }
 
+/**
+ * Uses Workers AI for a narrative summary when available, otherwise returns deterministic text.
+ */
 export async function enhanceSummaryWithAi(ai: AiBinding | undefined, baseSummary: string): Promise<EnhancedSummary> {
   if (!ai) {
     return {

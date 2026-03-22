@@ -6,7 +6,6 @@ dist/
 .dev.vars
 coverage/
 *.log
-LLM.TXT
 codecov
 codecov.exe
 codecov.asc

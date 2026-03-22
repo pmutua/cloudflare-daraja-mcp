@@ -5,6 +5,8 @@
 
 Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Daraja) APIs as AI-callable tools.
 
+If you are an LLM consumer: read [llm.txt](llm.txt) first and treat it as the primary integration contract.
+
 ## Start Here (Beginner Friendly)
 
 If you are new to MCP, read this first:

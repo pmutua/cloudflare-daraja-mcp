@@ -1,0 +1,104 @@
+# llm.txt
+
+contract_version: 1.0
+contract_mode: llm-to-llm
+
+Audience:
+- machine agents and LLM consumers
+- not human-first prose
+
+Execution mode:
+- deterministic
+- structured output preferred
+- avoid speculative assumptions
+
+SYSTEM IDENTITY
+- service: daraja-mcp-server
+- protocol: MCP over HTTP
+- runtime: Cloudflare Workers
+
+ENDPOINT CONTRACT
+- public:
+	- GET /health
+	- POST /callback
+- protected (must include x-api-key):
+	- GET /mcp/tools
+	- POST /mcp
+
+AUTH CONTRACT
+- required header for protected endpoints:
+	- x-api-key: <api_key>
+- required content type for POST:
+	- content-type: application/json
+
+IF/THEN RULES (MANDATORY)
+- IF route is /health THEN no API key required.
+- IF route is /callback THEN no API key required.
+- IF route is /mcp or /mcp/tools THEN send x-api-key.
+- IF HTTP 401 THEN stop and request valid API key context.
+- IF HTTP 429 THEN back off and retry after delay.
+- IF STK push returns accepted/queued THEN mark payment as pending, not successful.
+- IF callback not yet observed THEN use check_transaction_status for state refresh.
+- IF payment decision is required THEN call verify_payment_intent before final user answer.
+- IF Daraja failure code is present THEN call explain_error_code for user-facing message.
+- IF phone number is not normalized THEN convert to 2547XXXXXXXX before payment tools.
+- IF handling secrets THEN never echo, log, or return raw secret values.
+
+TOOL LIST (CURRENT)
+- get_usage_status
+- get_access_token
+- stk_push
+- check_transaction_status
+- verify_payment_intent
+- simulate_payment
+- explain_error_code
+- summarize_transaction_logs
+- orchestrate_payment_workflow
+
+PAYMENT SAFETY MODEL
+- do not equate stk_push acceptance with completion
+- rely on callback and/or status query for finality
+- keep response messaging factual and stateful:
+	- pending
+	- complete
+	- failed
+
+DATA + STATE
+- kv namespaces:
+	- USAGE
+	- TOKENS
+	- TRANSACTIONS
+	- CALLBACKS
+
+ERROR SEMANTICS
+- 401 => missing/invalid key
+- 429 => rate limit reached
+- 5xx/tool failure => transient or server-side; retry only if idempotent
+
+CALL SEQUENCE TEMPLATE
+1) GET /mcp/tools (auth) to validate tool visibility
+2) run stk_push
+3) wait callback OR run check_transaction_status
+4) run verify_payment_intent
+5) produce final structured answer
+
+OUTPUT STYLE FOR OTHER LLMS
+- short, explicit, machine-parseable fields
+- avoid narrative unless user requested
+- include status + reason + next_action
+
+EXAMPLE RESPONSE SHAPE
+{
+	"status": "pending|complete|failed",
+	"reason": "short machine-friendly reason",
+	"next_action": "tool or retry step"
+}
+
+ESCALATION RULE
+- IF required environment/auth context is missing THEN request only missing fields and do not proceed with payment execution.
+
+CANONICAL HUMAN DOCS
+- README.md
+- docs/ARCHITECTURE.md
+- docs/MCP_CONSUMERS.md
+-> A foundation for future fintech agents

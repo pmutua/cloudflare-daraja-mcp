@@ -62,9 +62,13 @@ A simple payment journey:
 1. Run `npm install`
 2. Run `npm run setup:local`
 3. Edit `.dev.vars` with real values
-4. Run `npm run doctor`
-5. Run `npm run dev`
-6. Open `/health` and confirm service is healthy
+4. Ensure `DARAJA_CALLBACK_URL` points to a real public HTTPS endpoint ending in `/callback`
+5. For STK Push, use the Lipa Na M-Pesa Online passkey (not Security Credential)
+6. Run `npm run doctor`
+7. Run `npm run dev`
+8. Open `/health` and confirm service is healthy
+
+Note: In sandbox, STK requests can be accepted even before final callback delivery. Your integration is only complete when callback payloads are received at `/callback`.
 
 ## 7. When To Use This Project
 

@@ -218,6 +218,14 @@ wrangler secret put DARAJA_PASSKEY
 wrangler secret put DARAJA_CALLBACK_URL
 ```
 
+Important notes:
+
+- A callback endpoint is required for end-to-end STK flow because final payment outcomes are sent asynchronously by Daraja.
+- This server already implements the callback route at POST /callback.
+- Set DARAJA_CALLBACK_URL to a real public HTTPS URL, for example https://<your-worker-domain>/callback.
+- For sandbox, use the Lipa Na M-Pesa Online passkey for shortcode 174379. Do not use Security Credential for STK password generation.
+- STK password formula is Base64(shortCode + passkey + timestamp), where timestamp format is YYYYMMDDHHmmss.
+
 Optional:
 
 - `DARAJA_TRANSACTION_TYPE` = `CustomerPayBillOnline` (default) or `CustomerBuyGoodsOnline`
@@ -243,6 +251,8 @@ preview_id = "<your-transactions-kv-preview-id>"
 Set your Daraja callback to this endpoint:
 
 - `https://<your-worker-domain>/callback`
+
+The callback endpoint stays unauthenticated by design so Safaricom can deliver payment updates.
 
 Add callback storage KV binding in `wrangler.toml`:
 

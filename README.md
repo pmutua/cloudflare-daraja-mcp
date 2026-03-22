@@ -299,17 +299,47 @@ npm run coverage:update
 ```
 
 <!-- coverage-report:start -->
-Last updated: 2026-03-21T23:07:57.344Z
+Last updated: 2026-03-22T00:35:43.569Z
 
 | Metric | Coverage | Covered | Total |
 | --- | ---: | ---: | ---: |
-| Statements | 52.39% | 219 | 418 |
-| Branches | 45.18% | 155 | 343 |
-| Functions | 54.28% | 38 | 70 |
-| Lines | 52.82% | 215 | 407 |
+| Statements | 80.69% | 347 | 430 |
+| Branches | 61.98% | 225 | 363 |
+| Functions | 84.50% | 60 | 71 |
+| Lines | 80.42% | 337 | 419 |
 
 Refresh with: `npm run coverage:update`
 <!-- coverage-report:end -->
+
+## CircleCI CI/CD
+
+This repository now includes CircleCI pipeline config at `.circleci/config.yml`.
+
+Pipeline behavior:
+
+- CI on branches and tags:
+  - `npm run check`
+  - `npm test`
+  - `npm run test:e2e`
+  - `npm run test:coverage`
+  - coverage artifacts stored in CircleCI
+- Optional Codecov upload when `CODECOV_TOKEN` is configured.
+- CD to sandbox on `main` branch.
+- CD to production on release tags matching `v*`.
+- Smoke tests after each deploy.
+
+Required CircleCI environment variables:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+- `SANDBOX_SERVICE_BASE_URL`
+- `SANDBOX_MCP_API_KEY`
+- `PROD_SERVICE_BASE_URL`
+- `PROD_MCP_API_KEY`
+
+Optional coverage upload variable:
+
+- `CODECOV_TOKEN`
 
 ## Deploy
 

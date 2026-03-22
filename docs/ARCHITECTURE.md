@@ -2,6 +2,8 @@
 
 This document explains the system architecture visually and shows practical usage examples.
 
+For consumer-specific setup details (VS Code, stdio-first hosts, and protocol-level smoke tests), see [docs/MCP_CONSUMERS.md](MCP_CONSUMERS.md).
+
 ## 1. System Architecture (High Level)
 
 ```mermaid

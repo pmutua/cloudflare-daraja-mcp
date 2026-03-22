@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- No unreleased changes yet.
+### Tests
+
+- Added `tests/mcp.test.ts` to cover MCP tool registration, request handling, input mapping, and error-path behavior.
+- Expanded `tests/insights.test.ts` with AI fallback and transaction-log summarization scenarios.
+- Increased total coverage to over 80% for statements and lines.
+
+### Documentation
+
+- Fixed README Mermaid architecture node syntax for reliable rendering.
+- Added detailed MCP consumer integration guide at `docs/MCP_CONSUMERS.md`.
+- Added release PR template at `docs/PR_RELEASE_v1.0.1.md`.
+
+### CI/CD
+
+- Added CircleCI pipeline at `.circleci/config.yml` with CI checks, test coverage generation, optional Codecov upload, and gated sandbox/production deployment with smoke tests.
 
 ## [1.0.2] - 2026-03-22
 

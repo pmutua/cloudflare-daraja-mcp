@@ -1,0 +1,217 @@
+version: 2.1
+
+jobs:
+  validate:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-deps-v1-{{ checksum "package-lock.json" }}
+            - node-deps-v1-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: node-deps-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+      - run:
+          name: Type check
+          command: npm run check
+      - run:
+          name: Unit and integration tests
+          command: npm test
+      - run:
+          name: Route end-to-end tests
+          command: npm run test:e2e
+      - run:
+          name: Coverage report
+          command: npm run test:coverage
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage
+
+  upload_coverage:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Upload coverage to Codecov (optional)
+          command: |
+            set -euo pipefail
+            if [ -z "${CODECOV_TOKEN:-}" ]; then
+              echo "CODECOV_TOKEN not set; skipping external coverage upload."
+              exit 0
+            fi
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            chmod +x codecov
+            ./codecov -t "${CODECOV_TOKEN}" -f coverage/coverage-final.json -F vitest
+
+  deploy_sandbox:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-deps-v1-{{ checksum "package-lock.json" }}
+            - node-deps-v1-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Deploy sandbox worker
+          command: npx wrangler deploy --name daraja-mcp-server-sandbox
+          environment:
+            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+            CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+
+  smoke_sandbox:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Smoke test health endpoint
+          command: |
+            set -euo pipefail
+            health_status=$(curl -sS -o /tmp/health.json -w "%{http_code}" "${SANDBOX_SERVICE_BASE_URL}/health")
+            test "$health_status" = "200"
+            grep -q '"ok":true' /tmp/health.json || grep -q '"ok": true' /tmp/health.json
+      - run:
+          name: Smoke test MCP tools endpoint
+          command: |
+            set -euo pipefail
+            tools_status=$(curl -sS -o /tmp/tools.json -w "%{http_code}" -H "x-api-key: ${SANDBOX_MCP_API_KEY}" "${SANDBOX_SERVICE_BASE_URL}/mcp/tools")
+            test "$tools_status" = "200"
+            grep -q '"tools"' /tmp/tools.json
+      - run:
+          name: Smoke test protected route unauthorized response
+          command: |
+            set -euo pipefail
+            unauthorized_status=$(curl -sS -o /tmp/mcp-unauthorized.json -w "%{http_code}" -X POST -H "content-type: application/json" -d '{}' "${SANDBOX_SERVICE_BASE_URL}/mcp")
+            test "$unauthorized_status" = "401"
+      - run:
+          name: Smoke test callback route accessibility
+          command: |
+            set -euo pipefail
+            callback_status=$(curl -sS -o /tmp/callback.json -w "%{http_code}" -X POST -H "content-type: application/json" -d '{}' "${SANDBOX_SERVICE_BASE_URL}/callback")
+            case "$callback_status" in
+              200|400)
+                ;;
+              *)
+                echo "Unexpected callback status: $callback_status"
+                exit 1
+                ;;
+            esac
+
+  deploy_production:
+    docker:
+      - image: cimg/node:20.11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-deps-v1-{{ checksum "package-lock.json" }}
+            - node-deps-v1-
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Deploy production worker
+          command: npm run deploy
+          environment:
+            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+            CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+
+  smoke_production:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Smoke test health endpoint
+          command: |
+            set -euo pipefail
+            health_status=$(curl -sS -o /tmp/health.json -w "%{http_code}" "${PROD_SERVICE_BASE_URL}/health")
+            test "$health_status" = "200"
+            grep -q '"ok":true' /tmp/health.json || grep -q '"ok": true' /tmp/health.json
+      - run:
+          name: Smoke test MCP tools endpoint
+          command: |
+            set -euo pipefail
+            tools_status=$(curl -sS -o /tmp/tools.json -w "%{http_code}" -H "x-api-key: ${PROD_MCP_API_KEY}" "${PROD_SERVICE_BASE_URL}/mcp/tools")
+            test "$tools_status" = "200"
+            grep -q '"tools"' /tmp/tools.json
+      - run:
+          name: Smoke test protected route unauthorized response
+          command: |
+            set -euo pipefail
+            unauthorized_status=$(curl -sS -o /tmp/mcp-unauthorized.json -w "%{http_code}" -X POST -H "content-type: application/json" -d '{}' "${PROD_SERVICE_BASE_URL}/mcp")
+            test "$unauthorized_status" = "401"
+      - run:
+          name: Smoke test callback route accessibility
+          command: |
+            set -euo pipefail
+            callback_status=$(curl -sS -o /tmp/callback.json -w "%{http_code}" -X POST -H "content-type: application/json" -d '{}' "${PROD_SERVICE_BASE_URL}/callback")
+            case "$callback_status" in
+              200|400)
+                ;;
+              *)
+                echo "Unexpected callback status: $callback_status"
+                exit 1
+                ;;
+            esac
+
+workflows:
+  ci_cd:
+    jobs:
+      - validate:
+          filters:
+            tags:
+              only: /.*/
+      - upload_coverage:
+          requires:
+            - validate
+          filters:
+            tags:
+              only: /.*/
+      - deploy_sandbox:
+          requires:
+            - validate
+          filters:
+            branches:
+              only: main
+            tags:
+              ignore: /.*/
+      - smoke_sandbox:
+          requires:
+            - deploy_sandbox
+          filters:
+            branches:
+              only: main
+            tags:
+              ignore: /.*/
+      - deploy_production:
+          requires:
+            - validate
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - smoke_production:
+          requires:
+            - deploy_production
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/

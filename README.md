@@ -8,6 +8,7 @@ If you are new to MCP, read this first:
 
 - [docs/BEGINNER_GUIDE.md](docs/BEGINNER_GUIDE.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/MCP_CONSUMERS.md](docs/MCP_CONSUMERS.md)
 
 In simple terms, this project lets an AI assistant safely do common M-Pesa payment tasks through structured tools.
 
@@ -64,6 +65,8 @@ flowchart LR
 ```
 
 For full architecture, sequence diagrams, and examples, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+For detailed setup across MCP consumers (VS Code, stdio-first hosts, and custom clients), see [docs/MCP_CONSUMERS.md](docs/MCP_CONSUMERS.md).
 
 ## Usage Examples
 

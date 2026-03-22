@@ -112,15 +112,9 @@ jobs:
             put_optional SANDBOX_DARAJA_ENV DARAJA_ENV
             put_optional SANDBOX_DARAJA_BASE_URL DARAJA_BASE_URL
             put_optional SANDBOX_DARAJA_TRANSACTION_TYPE DARAJA_TRANSACTION_TYPE
-          environment:
-            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
-            CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
       - run:
           name: Deploy sandbox worker
           command: npx wrangler deploy --name daraja-mcp-server-sandbox
-          environment:
-            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
-            CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
 
   smoke_sandbox:
     docker:

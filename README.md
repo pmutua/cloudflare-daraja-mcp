@@ -1,5 +1,8 @@
 # Daraja MCP Server
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/MdG3vm9TVnPbhbkUBLQymJ/NMC3yRBHbp3oGfRexkfvF1/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/MdG3vm9TVnPbhbkUBLQymJ/NMC3yRBHbp3oGfRexkfvF1/tree/main)
+[![codecov](https://codecov.io/github/pmutua/contact-form-cloudflare-worker/graph/badge.svg?token=UVN01PGU8D)](https://codecov.io/github/pmutua/contact-form-cloudflare-worker)
+
 Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Daraja) APIs as AI-callable tools.
 
 ## Start Here (Beginner Friendly)
@@ -323,10 +326,10 @@ Pipeline behavior:
   - `npm run test:e2e`
   - `npm run test:coverage`
   - coverage artifacts stored in CircleCI
-- Optional Codecov upload when `CODECOV_TOKEN` is configured.
+- Codecov upload uses token authentication and requires `CODECOV_TOKEN`.
 - CD to sandbox on `main` branch.
-- CD to production on release tags matching `v*`.
-- Smoke tests after each deploy.
+- Production deployment is intentionally disabled in CircleCI.
+- Smoke tests run for sandbox deploy.
 
 Required CircleCI environment variables:
 
@@ -334,12 +337,27 @@ Required CircleCI environment variables:
 - `CLOUDFLARE_ACCOUNT_ID`
 - `SANDBOX_SERVICE_BASE_URL`
 - `SANDBOX_MCP_API_KEY`
-- `PROD_SERVICE_BASE_URL`
-- `PROD_MCP_API_KEY`
 
-Optional coverage upload variable:
+Required runtime secret variables for sandbox deploy (auto-synced to Worker secrets):
+
+- `SANDBOX_API_KEY` -> `API_KEY`
+- `SANDBOX_DARAJA_CONSUMER_KEY` -> `DARAJA_CONSUMER_KEY`
+- `SANDBOX_DARAJA_CONSUMER_SECRET` -> `DARAJA_CONSUMER_SECRET`
+- `SANDBOX_DARAJA_SHORTCODE` -> `DARAJA_SHORTCODE`
+- `SANDBOX_DARAJA_PASSKEY` -> `DARAJA_PASSKEY`
+- `SANDBOX_DARAJA_CALLBACK_URL` -> `DARAJA_CALLBACK_URL`
+
+Optional sandbox runtime variables:
+
+- `SANDBOX_DARAJA_ENV` -> `DARAJA_ENV`
+- `SANDBOX_DARAJA_BASE_URL` -> `DARAJA_BASE_URL`
+- `SANDBOX_DARAJA_TRANSACTION_TYPE` -> `DARAJA_TRANSACTION_TYPE`
+
+Required coverage upload variable:
 
 - `CODECOV_TOKEN`
+
+Set `CODECOV_TOKEN` in CircleCI project environment variables (do not commit the token in source code).
 
 ## Deploy
 

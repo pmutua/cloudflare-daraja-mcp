@@ -1,6 +1,8 @@
 {
   "name": "daraja_mcp_server",
   "version": "1.0.0",
+  "description": "Cloudflare Workers MCP server for Safaricom Daraja APIs, including OAuth token management, STK Push, status query, payment verification, and callback handling.",
+  "category": "mcp-server",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,6 +19,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.13.3",
     "@cloudflare/workers-types": "^4.20260314.0",
+    "@types/node": "^25.5.0",
     "@vitest/coverage-v8": "^4.1.0",
     "typescript": "^5.8.2",
     "vitest": "^4.1.0",

@@ -41,8 +41,8 @@ describe("stkPush configuration edge cases", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const env = {
-      TOKENS: new InMemoryKv() as unknown as KVNamespace,
-      TRANSACTIONS: new InMemoryKv() as unknown as KVNamespace,
+      TOKENS: new InMemoryKv() as any,
+      TRANSACTIONS: new InMemoryKv() as any,
       DARAJA_CONSUMER_KEY: "key",
       DARAJA_CONSUMER_SECRET: "secret",
       DARAJA_SHORTCODE: "174379",
@@ -79,8 +79,8 @@ describe("stkPush configuration edge cases", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const env = {
-      TOKENS: new InMemoryKv() as unknown as KVNamespace,
-      TRANSACTIONS: new InMemoryKv() as unknown as KVNamespace,
+      TOKENS: new InMemoryKv() as any,
+      TRANSACTIONS: new InMemoryKv() as any,
       DARAJA_CONSUMER_KEY: "key",
       DARAJA_CONSUMER_SECRET: "secret",
       DARAJA_SHORTCODE: "174379",

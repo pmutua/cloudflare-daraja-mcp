@@ -428,7 +428,12 @@ Optional sandbox runtime variables:
 - `SANDBOX_DARAJA_TRANSACTION_TYPE` -> `DARAJA_TRANSACTION_TYPE`
 
 Coverage upload to Codecov is intentionally not run in CircleCI.
-Use the "Codecov CLI Upload (Manual, Local OS)" section above.
+CircleCI runs Codecov upload via Codecov orb (`codecov/codecov@5`).
+Use the "Codecov CLI Upload (Manual, Local OS)" section above when you need local/manual upload.
+
+Required Codecov variable in CircleCI:
+
+- `CODECOV_TOKEN`
 
 ## Pre-commit Hook
 

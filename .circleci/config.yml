@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@5
+
 jobs:
   validate:
     docker:
@@ -136,6 +139,13 @@ jobs:
             esac
 
 workflows:
+  upload-to-codecov:
+    jobs:
+      - validate
+      - codecov/upload:
+          requires:
+            - validate
+
   ci_cd:
     jobs:
       - validate:

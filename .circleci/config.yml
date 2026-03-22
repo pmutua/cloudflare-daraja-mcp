@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: cimg/node:20.11
+      - image: cimg/node:20.18
     steps:
       - checkout
       - restore_cache:
@@ -39,7 +39,7 @@ jobs:
 
   upload_coverage:
     docker:
-      - image: cimg/node:20.11
+      - image: cimg/node:20.18
     steps:
       - checkout
       - attach_workspace:
@@ -58,7 +58,7 @@ jobs:
 
   deploy_sandbox:
     docker:
-      - image: cimg/node:20.11
+      - image: cimg/node:20.18
     steps:
       - checkout
       - restore_cache:

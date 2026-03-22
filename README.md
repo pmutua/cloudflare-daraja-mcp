@@ -60,7 +60,7 @@ flowchart LR
   B --> D[Tool Handlers]
   D --> E[Daraja API]
   D --> F[Cloudflare KV]
-  E --> G[/callback]
+  E --> G["/callback endpoint"]
   G --> F
 ```
 

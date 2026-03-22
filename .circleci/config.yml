@@ -43,6 +43,17 @@ jobs:
           paths:
             - coverage
 
+  upload_codecov:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - codecov/upload:
+          files: coverage/coverage-final.json
+          flags: vitest
+
   deploy_sandbox:
     docker:
       - image: cimg/node:20.18
@@ -142,7 +153,7 @@ workflows:
   upload-to-codecov:
     jobs:
       - validate
-      - codecov/upload:
+      - upload_codecov:
           requires:
             - validate
 

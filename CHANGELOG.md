@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 - No unreleased changes yet.
 
+## [1.0.2] - 2026-03-22
+
+### Documentation
+
+- Added release PR template documentation at `docs/PR_RELEASE_v1.0.1.md` to standardize PR summary, validation evidence, rollout checks, and post-merge release steps.
+
 ## [1.0.1] - 2026-03-22
 
 ### Fixed

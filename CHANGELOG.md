@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- No unreleased changes yet.
+
+## [1.0.1] - 2026-03-22
+
 ### Fixed
 
 - Hardened payment intent verification to gracefully handle malformed callback phone values without throwing.
@@ -18,6 +22,7 @@ All notable changes to this project will be documented in this file.
 - Added automated coverage workflow using Vitest V8 provider and README coverage summary sync.
 - Added `tests/daraja.stk-push.config.test.ts` for partyB override and optional transaction description behavior.
 - Added `tests/doctor.placeholders.test.ts` for strict placeholder detection in developer environment checks.
+- Fixed test typing compatibility and added Node type declarations for test execution.
 
 ### Documentation
 
@@ -26,6 +31,9 @@ All notable changes to this project will be documented in this file.
 - Added architecture guide with Mermaid diagrams, sequence flow, and usage examples at `docs/ARCHITECTURE.md`.
 - Added curated official learning links for MCP, Cloudflare Workers/KV, Daraja, VS Code MCP usage, and Mermaid.
 - Added difficulty labels and estimated reading time to beginner learning links.
+- Clarified callback endpoint requirements and STK passkey versus Security Credential guidance.
+- Added and expanded TSDoc/JSDoc coverage across core source modules.
+- Expanded contributor guidance in `.github/copilot-instructions.md`.
 
 ## [1.0.0] - 2026-03-22
 

@@ -78,6 +78,14 @@ function rateLimited(remainingSeconds: number): Response {
   }, 429);
 }
 
+function missingBinding(binding: string): Response {
+  return json({
+    ok: false,
+    error: "configuration_error",
+    message: `Missing required KV binding: ${binding}`
+  }, 503);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -94,27 +102,35 @@ export default {
           timestamp: new Date().toISOString()
         });
       } else if (url.pathname === "/callback") {
-        response = await handleDarajaCallback(request, env.CALLBACKS);
+        if (!env.CALLBACKS) {
+          response = missingBinding("CALLBACKS");
+        } else {
+          response = await handleDarajaCallback(request, env.CALLBACKS);
+        }
       } else if (!isAuthorized(request, env)) {
         response = unauthorized();
       } else {
-        const usage = await checkAndIncrementDailyUsage(env.USAGE);
-        if (!usage.allowed) {
-          response = rateLimited(usage.retryAfterSeconds);
-        } else if (url.pathname === "/mcp") {
-          response = await handleMcpRequest(request, env);
-        } else if (request.method === "GET" && url.pathname === "/mcp/tools") {
-          response = json({
-            ok: true,
-            server: MCP_SERVER_INFO,
-            tools: getRegisteredTools()
-          });
+        if (!env.USAGE) {
+          response = missingBinding("USAGE");
         } else {
-          response = json({
-            ok: false,
-            error: "not_found",
-            message: "Route not found"
-          }, 404);
+          const usage = await checkAndIncrementDailyUsage(env.USAGE);
+          if (!usage.allowed) {
+            response = rateLimited(usage.retryAfterSeconds);
+          } else if (url.pathname === "/mcp") {
+            response = await handleMcpRequest(request, env);
+          } else if (request.method === "GET" && url.pathname === "/mcp/tools") {
+            response = json({
+              ok: true,
+              server: MCP_SERVER_INFO,
+              tools: getRegisteredTools()
+            });
+          } else {
+            response = json({
+              ok: false,
+              error: "not_found",
+              message: "Route not found"
+            }, 404);
+          }
         }
       }
 

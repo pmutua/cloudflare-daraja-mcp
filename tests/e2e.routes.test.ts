@@ -121,4 +121,20 @@ describe("Worker routes end-to-end", () => {
     const body = await response.json() as { error: string };
     expect(body.error).toBe("rate_limited");
   });
+
+  it("returns 503 when USAGE binding is missing", async () => {
+    const env = makeEnv({ USAGE: undefined });
+
+    const response = await worker.fetch(
+      new Request("https://example.com/mcp/tools", {
+        headers: { "x-api-key": "test-key" }
+      }),
+      env as any
+    );
+
+    expect(response.status).toBe(503);
+    const body = await response.json() as { error: string; message: string };
+    expect(body.error).toBe("configuration_error");
+    expect(body.message).toContain("USAGE");
+  });
 });

@@ -40,25 +40,6 @@ jobs:
           paths:
             - coverage
 
-  upload_coverage:
-    docker:
-      - image: cimg/node:20.18
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: Upload coverage to Codecov (token required)
-          command: |
-            set -euo pipefail
-            if [ -z "${CODECOV_TOKEN:-}" ]; then
-              echo "CODECOV_TOKEN is required for Codecov upload."
-              exit 1
-            fi
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            chmod +x codecov
-            ./codecov -t "${CODECOV_TOKEN}" -f coverage/coverage-final.json -F vitest
-
   deploy_sandbox:
     docker:
       - image: cimg/node:20.18
@@ -158,12 +139,6 @@ workflows:
   ci_cd:
     jobs:
       - validate:
-          filters:
-            tags:
-              only: /.*/
-      - upload_coverage:
-          requires:
-            - validate
           filters:
             tags:
               only: /.*/

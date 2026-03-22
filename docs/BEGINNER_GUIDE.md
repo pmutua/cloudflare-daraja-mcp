@@ -89,6 +89,8 @@ Not ideal when:
 - Version and release process: [docs/VERSIONING.md](VERSIONING.md)
 - Architecture diagrams and examples: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Coverage workflow and latest summary: [README.md](../README.md#test-coverage-report)
+- Manual Codecov CLI upload (Windows/Linux/macOS): [README.md](../README.md#codecov-cli-upload-manual-local-os)
+- Pre-commit quality gate: [README.md](../README.md#pre-commit-hook)
 - Change history: [CHANGELOG.md](../CHANGELOG.md)
 
 ## 9. Curated Learning Resources

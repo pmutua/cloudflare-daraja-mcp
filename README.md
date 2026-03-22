@@ -295,6 +295,18 @@ npm test
 
 ## Test Coverage Report
 
+Install coverage tooling (if starting from a minimal setup):
+
+```bash
+npm install --save-dev vitest @vitest/coverage-v8
+```
+
+Generate coverage output:
+
+```bash
+npx vitest run --coverage
+```
+
 Generate and refresh coverage report in README:
 
 ```bash
@@ -314,6 +326,71 @@ Last updated: 2026-03-22T00:35:43.569Z
 Refresh with: `npm run coverage:update`
 <!-- coverage-report:end -->
 
+## Codecov CLI Upload (Manual, Local OS)
+
+Codecov upload is intentionally done outside CircleCI in this repository.
+
+Best method for this project: manual local upload after coverage generation, to keep CI lean and avoid token handling in pipeline jobs.
+
+If you later choose CI-based upload, use the same verified CLI flow in your CI runner and keep `CODECOV_TOKEN` only in CI secrets.
+
+Recommended flow:
+
+1. Generate coverage: `npx vitest run --coverage`
+2. Verify and install Codecov CLI for your OS
+3. Upload with token:
+
+```bash
+./codecov upload-process -t "$CODECOV_TOKEN" -f coverage/coverage-final.json -F vitest
+```
+
+Windows (PowerShell):
+
+```powershell
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
+gpg.exe --import codecov.asc
+
+Invoke-WebRequest -Uri https://cli.codecov.io/latest/windows/codecov.exe -OutFile codecov.exe
+Invoke-WebRequest -Uri https://cli.codecov.io/latest/windows/codecov.exe.SHA256SUM -OutFile codecov.exe.SHA256SUM
+Invoke-WebRequest -Uri https://cli.codecov.io/latest/windows/codecov.exe.SHA256SUM.sig -OutFile codecov.exe.SHA256SUM.sig
+
+gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
+if ((Compare-Object -ReferenceObject ((($(certUtil -hashfile codecov.exe SHA256)[1]), 'codecov.exe') -join '  ') -DifferenceObject (Get-Content codecov.exe.SHA256SUM)).Length -eq 0) {
+  Write-Output 'SHASUM verified'
+} else {
+  exit 1
+}
+
+.\codecov.exe upload-process -t "$env:CODECOV_TOKEN" -f coverage/coverage-final.json -F vitest
+```
+
+Linux:
+
+```bash
+curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+curl -Os https://cli.codecov.io/latest/linux/codecov
+curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
+gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+shasum -a 256 -c codecov.SHA256SUM
+sudo chmod +x codecov
+./codecov upload-process -t "$CODECOV_TOKEN" -f coverage/coverage-final.json -F vitest
+```
+
+macOS:
+
+```bash
+curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+curl -Os https://cli.codecov.io/latest/macos/codecov
+curl -Os https://cli.codecov.io/latest/macos/codecov.SHA256SUM
+curl -Os https://cli.codecov.io/latest/macos/codecov.SHA256SUM.sig
+gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+shasum -a 256 -c codecov.SHA256SUM
+sudo chmod +x codecov
+./codecov upload-process -t "$CODECOV_TOKEN" -f coverage/coverage-final.json -F vitest
+```
+
 ## CircleCI CI/CD
 
 This repository now includes CircleCI pipeline config at `.circleci/config.yml`.
@@ -326,17 +403,14 @@ Pipeline behavior:
   - `npm run test:e2e`
   - `npm run test:coverage`
   - coverage artifacts stored in CircleCI
-- Codecov upload uses token authentication and requires `CODECOV_TOKEN`.
 - CD to sandbox on `main` branch.
 - Production deployment is intentionally disabled in CircleCI.
-- Smoke tests run for sandbox deploy.
+- Smoke tests are currently disabled in the workflow.
 
 Required CircleCI environment variables:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
-- `SANDBOX_SERVICE_BASE_URL`
-- `SANDBOX_MCP_API_KEY`
 
 Required runtime secret variables for sandbox deploy (auto-synced to Worker secrets):
 
@@ -353,11 +427,17 @@ Optional sandbox runtime variables:
 - `SANDBOX_DARAJA_BASE_URL` -> `DARAJA_BASE_URL`
 - `SANDBOX_DARAJA_TRANSACTION_TYPE` -> `DARAJA_TRANSACTION_TYPE`
 
-Required coverage upload variable:
+Coverage upload to Codecov is intentionally not run in CircleCI.
+Use the "Codecov CLI Upload (Manual, Local OS)" section above.
 
-- `CODECOV_TOKEN`
+## Pre-commit Hook
 
-Set `CODECOV_TOKEN` in CircleCI project environment variables (do not commit the token in source code).
+This repository uses Husky pre-commit hooks.
+
+- Hook file: `.husky/pre-commit`
+- Runs before each commit:
+  - `npm run check`
+  - `npm test`
 
 ## Deploy
 

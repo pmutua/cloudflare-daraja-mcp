@@ -7,3 +7,8 @@ dist/
 coverage/
 *.log
 LLM.TXT
+codecov
+codecov.exe
+codecov.asc
+codecov*.SHA256SUM
+codecov*.sig

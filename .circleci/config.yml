@@ -181,11 +181,3 @@ workflows:
               only: main
             tags:
               ignore: /.*/
-      - smoke_sandbox:
-          requires:
-            - deploy_sandbox
-          filters:
-            branches:
-              only: main
-            tags:
-              ignore: /.*/

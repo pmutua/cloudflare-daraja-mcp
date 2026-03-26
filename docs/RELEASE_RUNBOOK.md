@@ -6,14 +6,17 @@ This runbook defines a safe, repeatable release process for `daraja-mcp-server`.
 
 - You are on `main` with a clean working tree for release files.
 - Cloudflare credentials are available for Terraform and Wrangler.
-- For GitHub Actions deployment, repository or environment secrets are configured:
+- For CircleCI deployment, project environment variables are configured:
   - `CLOUDFLARE_API_TOKEN`
   - `CLOUDFLARE_ACCOUNT_ID`
-  - `SERVICE_BASE_URL` (full deployed URL used by smoke tests)
-  - `MCP_API_KEY` (API key used for authenticated `/mcp/tools` smoke test)
-- GitHub Environments exist:
-  - `sandbox` for main branch deploys (Worker name: `daraja-mcp-server-sandbox`)
-  - `production` for tag deploys (Worker name from `wrangler.toml`)
+  - `SANDBOX_USAGE_KV_ID`
+  - `SANDBOX_USAGE_KV_PREVIEW_ID`
+  - `SANDBOX_TOKENS_KV_ID`
+  - `SANDBOX_TOKENS_KV_PREVIEW_ID`
+  - `SANDBOX_TRANSACTIONS_KV_ID`
+  - `SANDBOX_TRANSACTIONS_KV_PREVIEW_ID`
+  - `SANDBOX_CALLBACKS_KV_ID`
+  - `SANDBOX_CALLBACKS_KV_PREVIEW_ID`
 - Required secrets are set in the target Worker:
   - `API_KEY`
   - `DARAJA_CONSUMER_KEY`
@@ -58,26 +61,27 @@ terraform apply
 cd ../..
 ```
 
-Capture outputs, especially `wrangler_kv_snippet`, and keep `wrangler.toml` in sync.
+Capture outputs, especially KV IDs, and store them in secure CI variables.
 
 ## 4. Deploy Worker
 
-Preferred path (GitHub Actions staged deployment):
+Preferred path (CircleCI):
 
-1. Push to `main` to deploy sandbox automatically.
-2. Create and push a version tag (`v*`) to deploy production.
+1. Push to `main` to run validation and sandbox deployment.
+2. CircleCI generates a temporary `.wrangler.sandbox.toml` from secure env vars and deploys with that config.
 
 Manual fallback (local):
 
-Deploy application code:
+Generate temporary deploy config from environment variables and deploy:
 
 ```bash
-npm run deploy
+node scripts/generate-wrangler-sandbox-config.mjs
+npx wrangler deploy --name daraja-mcp-server-sandbox -c .wrangler.sandbox.toml
 ```
 
 ## 5. Post-Deploy Smoke Checks
 
-GitHub Actions runs these checks automatically after deployment when environment secrets are configured.
+CircleCI can run these checks automatically after deployment when smoke checks are enabled.
 You can still run them manually for incident verification.
 
 1. `GET /health` returns HTTP `200` and `ok: true`.

@@ -405,6 +405,7 @@ Pipeline behavior:
   - `npm run test:e2e`
   - `npm run test:coverage`
   - coverage artifacts stored in CircleCI
+  - Codecov upload via CircleCI Codecov orb (`codecov/codecov@5`)
 - CD to sandbox on `main` branch.
 - Production deployment is intentionally disabled in CircleCI.
 - Smoke tests are currently disabled in the workflow.
@@ -423,14 +424,23 @@ Required runtime secret variables for sandbox deploy (auto-synced to Worker secr
 - `SANDBOX_DARAJA_PASSKEY` -> `DARAJA_PASSKEY`
 - `SANDBOX_DARAJA_CALLBACK_URL` -> `DARAJA_CALLBACK_URL`
 
+Required sandbox KV namespace variables for deploy config generation:
+
+- `SANDBOX_USAGE_KV_ID`
+- `SANDBOX_USAGE_KV_PREVIEW_ID`
+- `SANDBOX_TOKENS_KV_ID`
+- `SANDBOX_TOKENS_KV_PREVIEW_ID`
+- `SANDBOX_TRANSACTIONS_KV_ID`
+- `SANDBOX_TRANSACTIONS_KV_PREVIEW_ID`
+- `SANDBOX_CALLBACKS_KV_ID`
+- `SANDBOX_CALLBACKS_KV_PREVIEW_ID`
+
 Optional sandbox runtime variables:
 
 - `SANDBOX_DARAJA_ENV` -> `DARAJA_ENV`
 - `SANDBOX_DARAJA_BASE_URL` -> `DARAJA_BASE_URL`
 - `SANDBOX_DARAJA_TRANSACTION_TYPE` -> `DARAJA_TRANSACTION_TYPE`
 
-Coverage upload to Codecov is intentionally not run in CircleCI.
-CircleCI runs Codecov upload via Codecov orb (`codecov/codecov@5`).
 Use the "Codecov CLI Upload (Manual, Local OS)" section above when you need local/manual upload.
 
 Required Codecov variable in CircleCI:
@@ -447,6 +457,25 @@ This repository uses Husky pre-commit hooks.
   - `npm test`
 
 ## Deploy
+
+For security, `wrangler.toml` does not store real KV namespace IDs.
+Generate a temporary deploy config from environment variables and deploy using that generated file.
+
+Example (PowerShell):
+
+```powershell
+$env:SANDBOX_USAGE_KV_ID="<kv-id>"
+$env:SANDBOX_USAGE_KV_PREVIEW_ID="<kv-preview-id>"
+$env:SANDBOX_TOKENS_KV_ID="<kv-id>"
+$env:SANDBOX_TOKENS_KV_PREVIEW_ID="<kv-preview-id>"
+$env:SANDBOX_TRANSACTIONS_KV_ID="<kv-id>"
+$env:SANDBOX_TRANSACTIONS_KV_PREVIEW_ID="<kv-preview-id>"
+$env:SANDBOX_CALLBACKS_KV_ID="<kv-id>"
+$env:SANDBOX_CALLBACKS_KV_PREVIEW_ID="<kv-preview-id>"
+
+node scripts/generate-wrangler-sandbox-config.mjs
+npx wrangler deploy --name daraja-mcp-server-sandbox -c .wrangler.sandbox.toml
+```
 
 ```bash
 npm run deploy

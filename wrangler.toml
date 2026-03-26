@@ -3,23 +3,22 @@ main = "src/index.ts"
 compatibility_date = "2026-03-22"
 workers_dev = true
 
-# Configure before deploy:
-# [[kv_namespaces]]
-# binding = "USAGE"
-# id = "<your-usage-kv-namespace-id>"
-# preview_id = "<your-usage-kv-preview-id>"
+[[kv_namespaces]]
+binding = "USAGE"
+id = "<set-via-generated-config>"
+preview_id = "<set-via-generated-config>"
 
-# [[kv_namespaces]]
-# binding = "TOKENS"
-# id = "<your-tokens-kv-namespace-id>"
-# preview_id = "<your-tokens-kv-preview-id>"
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "<set-via-generated-config>"
+preview_id = "<set-via-generated-config>"
 
-# [[kv_namespaces]]
-# binding = "TRANSACTIONS"
-# id = "<your-transactions-kv-namespace-id>"
-# preview_id = "<your-transactions-kv-preview-id>"
+[[kv_namespaces]]
+binding = "TRANSACTIONS"
+id = "<set-via-generated-config>"
+preview_id = "<set-via-generated-config>"
 
-# [[kv_namespaces]]
-# binding = "CALLBACKS"
-# id = "<your-callbacks-kv-namespace-id>"
-# preview_id = "<your-callbacks-kv-preview-id>"
+[[kv_namespaces]]
+binding = "CALLBACKS"
+id = "<set-via-generated-config>"
+preview_id = "<set-via-generated-config>"

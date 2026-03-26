@@ -10,6 +10,37 @@ DARAJA_CALLBACK_URL=https://example.com/callback
 
 # Optional
 DARAJA_ENV=sandbox
-# DARAJA_BASE_URL=https://sandbox.safaricom.co.ke
-# DARAJA_TRANSACTION_TYPE=CustomerPayBillOnline
-# DEBUG_MODE=true
+DARAJA_BASE_URL=https://sandbox.safaricom.co.ke
+DARAJA_TRANSACTION_TYPE=CustomerPayBillOnline
+DEBUG_MODE=false
+
+# Sandbox deploy/runtime secret sync (CircleCI)
+SANDBOX_API_KEY=replace_with_api_key
+SANDBOX_DARAJA_CONSUMER_KEY=replace_with_consumer_key
+SANDBOX_DARAJA_CONSUMER_SECRET=replace_with_consumer_secret
+SANDBOX_DARAJA_SHORTCODE=replace_with_shortcode
+SANDBOX_DARAJA_PASSKEY=replace_with_passkey
+SANDBOX_DARAJA_CALLBACK_URL=https://example.com/callback
+SANDBOX_DARAJA_ENV=sandbox
+SANDBOX_DARAJA_BASE_URL=https://sandbox.safaricom.co.ke
+SANDBOX_DARAJA_TRANSACTION_TYPE=CustomerPayBillOnline
+
+# Sandbox deploy KV namespace IDs (used by scripts/generate-wrangler-sandbox-config.mjs)
+SANDBOX_USAGE_KV_ID=replace_with_usage_kv_id
+SANDBOX_USAGE_KV_PREVIEW_ID=replace_with_usage_kv_preview_id
+SANDBOX_TOKENS_KV_ID=replace_with_tokens_kv_id
+SANDBOX_TOKENS_KV_PREVIEW_ID=replace_with_tokens_kv_preview_id
+SANDBOX_TRANSACTIONS_KV_ID=replace_with_transactions_kv_id
+SANDBOX_TRANSACTIONS_KV_PREVIEW_ID=replace_with_transactions_kv_preview_id
+SANDBOX_CALLBACKS_KV_ID=replace_with_callbacks_kv_id
+SANDBOX_CALLBACKS_KV_PREVIEW_ID=replace_with_callbacks_kv_preview_id
+
+# Sandbox smoke checks
+SANDBOX_SERVICE_BASE_URL=https://example.workers.dev
+SANDBOX_MCP_API_KEY=replace_with_api_key
+
+# Optional CI helper variables
+CLOUDFLARE_ACCOUNT_ID=replace_with_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=replace_with_cloudflare_api_token
+TF_VAR_cloudflare_api_token=replace_with_cloudflare_api_token
+CODECOV_TOKEN=replace_with_codecov_token

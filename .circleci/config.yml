@@ -108,8 +108,11 @@ jobs:
             put_optional SANDBOX_DARAJA_BASE_URL DARAJA_BASE_URL
             put_optional SANDBOX_DARAJA_TRANSACTION_TYPE DARAJA_TRANSACTION_TYPE
       - run:
+          name: Generate sandbox deploy config with KV namespace IDs
+          command: node scripts/generate-wrangler-sandbox-config.mjs
+      - run:
           name: Deploy sandbox worker
-          command: npx wrangler deploy --name daraja-mcp-server-sandbox
+          command: npx wrangler deploy --name daraja-mcp-server-sandbox -c .wrangler.sandbox.toml
 
   smoke_sandbox:
     docker:

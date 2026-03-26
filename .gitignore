@@ -11,3 +11,5 @@ codecov.exe
 codecov.asc
 codecov*.SHA256SUM
 codecov*.sig
+.wrangler.sandbox.toml
+

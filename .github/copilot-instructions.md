@@ -36,6 +36,24 @@ The main goal is to expose safe, structured payment tools to AI clients while pr
 - Do not bundle unrelated refactors into feature commits.
 - Prefer small, reviewable diffs focused on one behavior change.
 
+## Git Flow Rules (Strictly Enforced)
+- **NEVER push directly to main.** All changes reach main through pull requests only.
+- Default branch: `main`.
+- Branch naming conventions:
+  - `feat/<name>` for features
+  - `fix/<name>` for bug fixes
+  - `chore/<name>` for maintenance tasks
+  - `release/v<version>` for releases
+- Standard workflow:
+  1. Create a feature branch from `main`.
+  2. Make commits on the feature branch.
+  3. Push the feature branch to remote.
+  4. Open a pull request targeting `main`.
+  5. Merge via GitHub PR (never local merge + push to main).
+- After PR merge, delete the remote feature branch.
+- Keep local `main` in sync with `git pull origin main`, never `git push origin main`.
+- Do not use `git push --force` on shared branches.
+
 ## TDD Workflow (Required)
 For every new feature:
 1. Add or update tests first.

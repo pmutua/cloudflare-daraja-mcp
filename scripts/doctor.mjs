@@ -53,6 +53,15 @@ const optional = [
 
 const missing = required.filter((name) => !merged[name] || String(merged[name]).trim().length === 0);
 
+function isExampleDomainUrl(value) {
+  try {
+    const { hostname } = new URL(value);
+    return hostname === "example.com" || hostname.endsWith(".example.com");
+  } catch {
+    return false;
+  }
+}
+
 function isPlaceholderValue(key, value) {
   const normalized = String(value ?? "").trim();
   if (normalized.length === 0) {
@@ -63,7 +72,11 @@ function isPlaceholderValue(key, value) {
     return true;
   }
 
-  if ((key === "DARAJA_CALLBACK_URL" || key === "API_KEY") && normalized.includes("example.com")) {
+  if (key === "DARAJA_CALLBACK_URL" && isExampleDomainUrl(normalized)) {
+    return true;
+  }
+
+  if (key === "API_KEY" && normalized.toLowerCase().includes("example")) {
     return true;
   }
 

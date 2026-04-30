@@ -14,6 +14,9 @@ DARAJA_BASE_URL=https://sandbox.safaricom.co.ke
 DARAJA_TRANSACTION_TYPE=CustomerPayBillOnline
 DEBUG_MODE=false
 
+# Codex MCP server tokens (used by .codex/config.toml)
+GITHUB_PAT_TOKEN=replace_with_github_personal_access_token
+
 # Sandbox deploy/runtime secret sync (CircleCI)
 SANDBOX_API_KEY=replace_with_api_key
 SANDBOX_DARAJA_CONSUMER_KEY=replace_with_consumer_key

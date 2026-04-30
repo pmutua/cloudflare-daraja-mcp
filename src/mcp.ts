@@ -14,8 +14,49 @@ import { createPaymentWorkflowPlan } from "./agents";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
-  version: "1.0.0"
+  version: "1.0.2"
 } as const;
+
+/**
+ * Instructions sent to MCP clients during initialization.
+ * Educates connected AI agents on how to use this server correctly.
+ */
+export const MCP_SERVER_INSTRUCTIONS = `You are connected to daraja-mcp-server, an MCP server for Safaricom Daraja M-Pesa payment APIs.
+
+RULES:
+- Normalize phone numbers to 2547XXXXXXXX before calling payment tools.
+- An stk_push acceptance does NOT mean payment is complete. Always check status via callback or check_transaction_status.
+- Never echo, log, or return raw secrets, passkeys, or credentials.
+- If you receive HTTP 401, stop and request a valid API key.
+- If you receive HTTP 429, back off and retry after a delay.
+
+TOOL SEQUENCING:
+1. Use get_access_token to verify connectivity.
+2. Use stk_push to initiate a payment (returns pending, not complete).
+3. Use check_transaction_status to poll for finality.
+4. Use verify_payment_intent to confirm amount/phone match before reporting success.
+5. Use explain_error_code if any Daraja error code is returned.
+
+AVAILABLE TOOLS:
+- get_usage_status: Check daily rate limit status.
+- get_access_token: Obtain Daraja OAuth token.
+- stk_push: Initiate Lipa Na M-Pesa STK Push.
+- check_transaction_status: Query STK push result.
+- verify_payment_intent: Verify payment by amount/phone.
+- simulate_payment: Simulate payment for testing (sandbox only).
+- explain_error_code: Explain Daraja error codes.
+- summarize_transaction_logs: Summarize transaction history.
+- orchestrate_payment_workflow: Generate multi-step payment plan.
+
+PAYMENT SAFETY:
+- Pending means the user has not yet completed the payment on their phone.
+- Only report success after check_transaction_status or callback confirms completion.
+- Keep responses factual: pending, complete, or failed.
+
+OUTPUT FORMAT:
+- Return structured JSON with status, reason, and next_action fields.
+- Avoid narrative unless the user requests it.
+` as const;
 
 type ToolRuntimeEnv = {
   TOKENS: KVNamespace;
@@ -77,7 +118,8 @@ function createMcpServer(env: ToolRuntimeEnv): McpServer {
   const server = new McpServer(MCP_SERVER_INFO, {
     capabilities: {
       tools: {}
-    }
+    },
+    instructions: MCP_SERVER_INSTRUCTIONS
   });
 
   for (const tool of registeredTools.values()) {

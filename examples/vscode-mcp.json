@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "daraja": {
+      "type": "http",
+      "url": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "${input:daraja-api-key}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "daraja-api-key",
+      "type": "promptString",
+      "description": "Daraja MCP Server API Key",
+      "password": true
+    }
+  ]
+}

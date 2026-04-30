@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "daraja": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://<your-domain>/mcp",
+        "--header",
+        "x-api-key: <your-api-key>"
+      ]
+    }
+  }
+}

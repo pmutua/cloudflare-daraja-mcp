@@ -1,0 +1,6 @@
+# Add this to your project's .codex/config.toml or ~/.codex/config.toml
+# to use the Daraja MCP Server as a payment tool in Codex sessions.
+
+[mcp_servers.daraja]
+url = "https://<your-domain>/mcp"
+headers = { "x-api-key" = "${DARAJA_MCP_API_KEY}" }

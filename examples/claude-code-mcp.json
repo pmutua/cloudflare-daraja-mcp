@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "daraja": {
+      "type": "url",
+      "url": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "<your-api-key>"
+      }
+    }
+  }
+}

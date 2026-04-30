@@ -3,9 +3,31 @@
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/pmutua/cloudflare-daraja-mcp/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/pmutua/cloudflare-daraja-mcp/tree/main)
 [![codecov](https://codecov.io/github/pmutua/cloudflare-daraja-mcp/branch/main/graph/badge.svg?token=CJKEFRCQJC)](https://codecov.io/github/pmutua/cloudflare-daraja-mcp)
 
-Cloudflare Worker foundation for an MCP server that exposes Safaricom M-Pesa (Daraja) APIs as AI-callable tools.
+A self-hosted MCP server for Safaricom M-Pesa (Daraja) APIs, deployed on Cloudflare Workers. You clone it, add your own Daraja credentials, deploy to your own Cloudflare account, and connect your AI tools to it.
 
 If you are an LLM consumer: read [llm.txt](llm.txt) first and treat it as the primary integration contract.
+
+## Who Is This For?
+
+This server is designed to be **self-hosted**. There is no shared hosted instance — each user deploys their own.
+
+| Audience | What You Get |
+|----------|-------------|
+| **Developers building AI-powered apps** | Deploy this to your Cloudflare account, connect your AI assistant (VS Code Copilot, Claude, Cursor), and your agent can initiate M-Pesa payments, check statuses, and debug errors without you writing glue code. |
+| **Teams shipping M-Pesa integrations** | Use this as your payment backend for AI agents — customer support bots, checkout assistants, or automation workflows that need to trigger and verify payments. |
+| **Solo developers exploring MCP** | Fork, deploy to sandbox with test credentials, and experiment with how AI tools interact with real payment APIs in a safe environment. |
+
+### Deployment Model
+
+```
+You (developer)
+  ├── Clone this repo
+  ├── Add your Daraja credentials (consumer key, secret, passkey)
+  ├── Deploy to YOUR Cloudflare account (free tier works)
+  └── Connect your AI tools to YOUR worker URL
+```
+
+Each deployment is isolated. Your credentials, KV data, rate limits, and transaction logs belong entirely to you. Nobody else can access your instance.
 
 ## Start Here (Beginner Friendly)
 
@@ -142,7 +164,7 @@ Implemented: **Commit 1 - Project Bootstrap**, **Commit 2 - MCP Server Setup**, 
 - Basic `fetch` handler
 - Health endpoint: `GET /health`
 - MCP SDK integrated (`@modelcontextprotocol/sdk`)
-- MCP server configured as `daraja-mcp-server` v`1.0.0`
+- MCP server configured as `daraja-mcp-server` v`1.0.2`
 - Basic tool registration with initial `get_usage_status` tool
 - MCP transport endpoint: `/mcp`
 - Tool discovery endpoint: `GET /mcp/tools`
@@ -507,3 +529,67 @@ Release governance documents:
   "timestamp": "2026-03-22T00:00:00.000Z"
 }
 ```
+
+## Integrate with Your AI Tool
+
+After deploying to your own Cloudflare account, connect your AI coding assistant or production agent to your Worker URL.
+
+**For developers:** Point your IDE's MCP client at your deployed server so your AI assistant can test M-Pesa flows, debug error codes, and verify transactions — no context-switching to Postman or writing throwaway scripts.
+
+**For production AI agents:** Connect your chatbot, customer support agent, or automation workflow so it can initiate payments, check status, and handle M-Pesa operations on behalf of real users.
+
+Copy-paste config templates are in [`examples/`](examples/):
+
+| Platform | Config File | Setup |
+|----------|------------|-------|
+| VS Code (Copilot Chat) | [`examples/vscode-mcp.json`](examples/vscode-mcp.json) | Copy to `.vscode/mcp.json` |
+| Claude Code | [`examples/claude-code-mcp.json`](examples/claude-code-mcp.json) | Copy to `.mcp.json` or `claude mcp add` |
+| Claude Desktop | [`examples/claude-desktop-config.json`](examples/claude-desktop-config.json) | Merge into `claude_desktop_config.json` |
+| Cursor | [`examples/cursor-mcp.json`](examples/cursor-mcp.json) | Copy to `.cursor/mcp.json` |
+| Windsurf | [`examples/windsurf-mcp.json`](examples/windsurf-mcp.json) | Add via Windsurf MCP settings |
+| OpenAI Codex | [`examples/codex-consumer-config.toml`](examples/codex-consumer-config.toml) | Add to `.codex/config.toml` |
+
+All templates use `https://<your-domain>/mcp` — replace with your deployed Worker URL.
+
+For detailed setup instructions per platform, see [docs/MCP_CONSUMERS.md](docs/MCP_CONSUMERS.md).
+
+## Using with OpenAI Codex
+
+This project is fully configured for OpenAI Codex (CLI, IDE extension, and Codex app).
+
+### Quick Start
+
+```bash
+npm install -g @openai/codex
+cd daraja_mcp_server
+codex
+```
+
+Codex automatically reads `AGENTS.md` and loads project-scoped configuration from `.codex/config.toml`.
+
+### What's Included
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `AGENTS.md` | Root | Project context, conventions, commands |
+| `.codex/config.toml` | Project | MCP servers, agent config, skills |
+| `.codex/agents/` | Project | Custom agent definitions (6 agents) |
+| `.agents/skills/` | Project | Reusable workflow skills (6 skills) |
+| `.codex/PLANS.md` | Project | Planning template for complex tasks |
+| `.codex/code_review.md` | Project | Review standards reference |
+| `docs/CODEX_GUIDE.md` | Docs | Full Codex usage guide |
+
+### Multi-Agent Workflows
+
+```
+# Full codebase analysis
+Analyze this codebase. Spawn codebase_analyst, reviewer, and pr_explorer in parallel.
+
+# PR review
+Review this branch against main with security, correctness, and test coverage agents.
+
+# TDD implementation
+$tdd-workflow — Fix [describe issue] with full TDD.
+```
+
+See [docs/CODEX_GUIDE.md](docs/CODEX_GUIDE.md) for complete workflow documentation.

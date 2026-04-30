@@ -33,6 +33,12 @@ The main goal is to expose safe, structured payment tools to AI clients while pr
   - Deployable
   - Type-safe (npm run check)
   - Test-validated (npm test)
+- Use conventional commit format for all commit messages:
+  - `feat: <description>` — new features or capabilities
+  - `fix: <description>` — bug fixes
+  - `chore: <description>` — maintenance, deps, docs, config
+  - `refactor: <description>` — code restructuring, no behavior change
+  - `test: <description>` — adding or updating tests only
 - Do not bundle unrelated refactors into feature commits.
 - Prefer small, reviewable diffs focused on one behavior change.
 

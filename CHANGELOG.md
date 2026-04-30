@@ -4,17 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Tests
+## [1.1.0] - 2026-04-30
 
-- Added `tests/mcp.test.ts` to cover MCP tool registration, request handling, input mapping, and error-path behavior.
-- Expanded `tests/insights.test.ts` with AI fallback and transaction-log summarization scenarios.
-- Increased total coverage to over 80% for statements and lines.
+### Added
+
+- Added MCP server initialization instructions to guide client tool sequencing, payment finality checks, rate-limit handling, and safe structured output.
+- Added MCP consumer configuration examples for VS Code, Claude Code, Claude Desktop, Cursor, Windsurf, and OpenAI Codex.
+- Added Codex project configuration, reusable agent workflow skills, project agent definitions, and `AGENTS.md` guidance for consistent contributor automation.
 
 ### Documentation
 
+- Expanded README positioning for self-hosted Daraja MCP deployments and AI client integration.
+- Expanded beginner and MCP consumer guides with current tools, infrastructure endpoints, and setup steps.
+- Added Codex usage guide for project-scoped agents, skills, MCP servers, and troubleshooting.
 - Fixed README Mermaid architecture node syntax for reliable rendering.
 - Added detailed MCP consumer integration guide at `docs/MCP_CONSUMERS.md`.
 - Added release PR template at `docs/PR_RELEASE_v1.0.1.md`.
+
+### Tests
+
+- Added coverage for exported MCP server instructions and transport initialization options.
+- Added `tests/mcp.test.ts` to cover MCP tool registration, request handling, input mapping, and error-path behavior.
+- Expanded `tests/insights.test.ts` with AI fallback and transaction-log summarization scenarios.
+- Increased total coverage to over 80% for statements and lines.
 
 ### CI/CD
 

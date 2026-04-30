@@ -26,10 +26,14 @@ vi.mock("../src/agents", () => ({
   createPaymentWorkflowPlan: mockCreatePaymentWorkflowPlan
 }));
 
+let lastMcpServerOptions: unknown = null;
+
 class MockMcpServer {
   private tools = new Map<string, (args: Record<string, unknown>) => Promise<unknown>>();
 
-  constructor(_info: unknown, _options: unknown) {}
+  constructor(_info: unknown, options: unknown) {
+    lastMcpServerOptions = options;
+  }
 
   registerTool(
     name: string,
@@ -152,5 +156,34 @@ describe("mcp module", () => {
     expect(payload.isError).toBe(true);
     expect(payload.structuredContent.error).toBe("tool_execution_failed");
     expect(payload.structuredContent.message).toContain("boom");
+  });
+
+  it("passes instructions to McpServer on creation", async () => {
+    const mcp = await import("../src/mcp");
+
+    const env = { TOKENS: {}, TRANSACTIONS: {} } as any;
+    const request = new Request("https://example.com/mcp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "get_usage_status", args: {} })
+    });
+
+    await mcp.handleMcpRequest(request, env);
+
+    const options = lastMcpServerOptions as { instructions?: string; capabilities?: unknown };
+    expect(options).toBeDefined();
+    expect(options.instructions).toBeDefined();
+    expect(typeof options.instructions).toBe("string");
+    expect(options.instructions!.length).toBeGreaterThan(100);
+    expect(options.instructions).toContain("daraja-mcp-server");
+    expect(options.instructions).toContain("stk_push");
+    expect(options.instructions).toContain("2547XXXXXXXX");
+  });
+
+  it("exports MCP_SERVER_INSTRUCTIONS as a non-empty string", async () => {
+    const mcp = await import("../src/mcp");
+    expect(mcp.MCP_SERVER_INSTRUCTIONS).toBeDefined();
+    expect(typeof mcp.MCP_SERVER_INSTRUCTIONS).toBe("string");
+    expect(mcp.MCP_SERVER_INSTRUCTIONS.length).toBeGreaterThan(100);
   });
 });

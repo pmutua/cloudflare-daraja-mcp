@@ -14,7 +14,7 @@ import { createPaymentWorkflowPlan } from "./agents";
 
 export const MCP_SERVER_INFO = {
   name: "daraja-mcp-server",
-  version: "1.0.2"
+  version: "1.1.0"
 } as const;
 
 /**

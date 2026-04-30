@@ -66,60 +66,176 @@ Recommended setup:
 1. Run `MCP: Add Server` from Command Palette
 2. Choose workspace or user scope
 3. Use HTTP server type and set URL to `https://<your-domain>/mcp`
-4. Configure auth without hardcoding secrets (input variables/environment mechanism)
+4. Configure auth using input variables (never hardcode secrets)
 5. Start server, trust it, and verify tool list in Chat
 
-`mcp.json` shape (illustrative):
+Copy the template from [`examples/vscode-mcp.json`](../examples/vscode-mcp.json) into `.vscode/mcp.json`:
 
 ```json
 {
   "servers": {
     "daraja": {
       "type": "http",
-      "url": "https://<your-domain>/mcp"
+      "url": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "${input:daraja-api-key}"
+      }
     }
-  }
+  },
+  "inputs": [
+    {
+      "id": "daraja-api-key",
+      "type": "promptString",
+      "description": "Daraja MCP Server API Key",
+      "password": true
+    }
+  ]
 }
 ```
 
 Important:
 
 - Do not commit API keys into `.vscode/mcp.json`.
-- Keep `x-api-key` in secure input variables or profile-level secret inputs.
+- The `${input:daraja-api-key}` syntax prompts securely at runtime.
 - Use VS Code MCP output logs if startup/tool discovery fails.
 
-## 5. Claude Desktop and Other stdio-First Consumers
+## 5. Claude Code Setup
 
-Some consumers are primarily configured as local `stdio` subprocesses.
+Claude Code supports remote HTTP MCP servers natively.
 
-Because this Daraja MCP server is remote HTTP:
+Add to your project's `.mcp.json` or run `claude mcp add`:
 
-1. If the consumer supports remote MCP URLs directly, configure URL + auth header.
-2. If the consumer only supports `stdio`, run a local MCP bridge/proxy that:
-   - exposes `stdio` to the consumer
-   - forwards MCP JSON-RPC to `https://<your-domain>/mcp`
-   - injects `x-api-key` securely
+```bash
+claude mcp add daraja --transport http --url "https://<your-domain>/mcp" --header "x-api-key: <your-api-key>"
+```
 
-Validation remains the same:
+Or copy [`examples/claude-code-mcp.json`](../examples/claude-code-mcp.json) to `.mcp.json` in your project root:
 
-- ensure tools are listed
-- call `get_usage_status`
-- run an STK test in sandbox
+```json
+{
+  "mcpServers": {
+    "daraja": {
+      "type": "url",
+      "url": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
 
-## 6. Cursor, ChatGPT, and Other MCP Consumers
+Verify:
 
-MCP usage model is generally identical:
+```bash
+claude mcp list
+```
+
+## 6. Claude Desktop Setup (stdio Bridge Required)
+
+Claude Desktop only supports `stdio` transport. Use `mcp-remote` as a bridge:
+
+Copy [`examples/claude-desktop-config.json`](../examples/claude-desktop-config.json) into your Claude Desktop config:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "daraja": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://<your-domain>/mcp",
+        "--header",
+        "x-api-key: <your-api-key>"
+      ]
+    }
+  }
+}
+```
+
+Prerequisites:
+
+- Node.js installed (for `npx`)
+- `mcp-remote` bridges stdio ↔ remote HTTP automatically
+
+## 7. Cursor IDE Setup
+
+Cursor supports MCP servers via project or global config.
+
+Add to `.cursor/mcp.json` in your project root. See [`examples/cursor-mcp.json`](../examples/cursor-mcp.json):
+
+```json
+{
+  "mcpServers": {
+    "daraja": {
+      "url": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+Then in Cursor: Settings → MCP → verify the server appears and tools are listed.
+
+## 8. Windsurf IDE Setup
+
+Windsurf uses a similar MCP config format. See [`examples/windsurf-mcp.json`](../examples/windsurf-mcp.json):
+
+```json
+{
+  "mcpServers": {
+    "daraja": {
+      "serverUrl": "https://<your-domain>/mcp",
+      "headers": {
+        "x-api-key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+Place in your project's MCP config location per Windsurf docs, or configure via Windsurf settings.
+
+## 9. OpenAI Codex (as Consumer)
+
+To use this server as a payment tool inside Codex sessions, add to your project's `.codex/config.toml` or `~/.codex/config.toml`.
+
+See [`examples/codex-consumer-config.toml`](../examples/codex-consumer-config.toml):
+
+```toml
+[mcp_servers.daraja]
+url = "https://<your-domain>/mcp"
+headers = { "x-api-key" = "${DARAJA_MCP_API_KEY}" }
+```
+
+Set the environment variable:
+
+```bash
+export DARAJA_MCP_API_KEY="your-api-key"
+```
+
+Then start a Codex session — the Daraja tools will be available for payment operations.
+
+## 10. Other MCP Consumers
+
+For any MCP-compatible client not listed above:
 
 1. Add remote MCP server URL (`https://<your-domain>/mcp`)
-2. Configure authentication securely
+2. Configure `x-api-key` header authentication
 3. Refresh/reconnect the MCP session
-4. Confirm tool discovery and run a smoke tool call
+4. Confirm tool discovery and run `get_usage_status` as a smoke test
 
 Use the official MCP clients index for up-to-date client-specific instructions:
 
 - https://modelcontextprotocol.io/clients
 
-## 7. Raw Protocol Smoke Test (Consumer-Agnostic)
+## 11. Raw Protocol Smoke Test (Consumer-Agnostic)
 
 Use these checks to isolate consumer issues from server issues.
 
@@ -173,7 +289,7 @@ curl -X POST "https://<your-domain>/mcp" \
   }'
 ```
 
-## 8. End-to-End STK Validation Across Consumers
+## 12. End-to-End STK Validation Across Consumers
 
 For real confidence, run this sequence from the consumer you integrated:
 
@@ -189,7 +305,7 @@ Sandbox essentials:
 - Use Lipa Na M-Pesa passkey (not Security Credential)
 - Callback URL must be public HTTPS
 
-## 9. Security and Operations Checklist
+## 13. Security and Operations Checklist
 
 Before enabling in any consumer:
 
@@ -199,7 +315,7 @@ Before enabling in any consumer:
 - Monitor logs for repeated auth failures/rate-limit hits
 - Keep callback endpoint public, but keep all other routes API-key protected
 
-## 10. Troubleshooting by Symptom
+## 14. Troubleshooting by Symptom
 
 - Tools not visible:
   - Check server is started/reachable
@@ -221,7 +337,7 @@ Before enabling in any consumer:
   - permission scope mismatch for query API
   - wrong environment/product binding
 
-## 11. Recommended Consumer Rollout Plan
+## 15. Recommended Consumer Rollout Plan
 
 1. Integrate in one development consumer (for example VS Code)
 2. Validate full STK lifecycle in sandbox

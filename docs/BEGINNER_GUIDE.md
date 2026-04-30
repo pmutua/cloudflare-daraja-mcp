@@ -30,13 +30,19 @@ It calls this MCP server, and this server handles Daraja requests safely.
 
 Main capabilities:
 
-1. Get Daraja OAuth access token (`get_access_token`)
-2. Start STK push request (`stk_push`)
-3. Check payment status (`check_transaction_status`)
-4. Verify payment intent (`verify_payment_intent`)
-5. Accept Daraja callback updates (`POST /callback`)
+1. Check API usage and rate limit status (`get_usage_status`)
+2. Get Daraja OAuth access token (`get_access_token`)
+3. Start STK push request (`stk_push`)
+4. Check payment status (`check_transaction_status`)
+5. Verify payment intent (`verify_payment_intent`)
 6. Simulate payment during development (`simulate_payment`)
 7. Explain Daraja error codes (`explain_error_code`)
+8. Summarize transaction logs (`summarize_transaction_logs`)
+9. Generate multi-step payment workflow plans (`orchestrate_payment_workflow`)
+
+Infrastructure endpoints (not MCP tools):
+- `POST /callback` — Accepts Daraja callback updates (unauthenticated, for Safaricom to post results)
+- `GET /health` — Public health check
 
 ## 4. Basic Flow Example
 
